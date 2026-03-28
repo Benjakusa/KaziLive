@@ -21,11 +21,13 @@ def create_app(config_class=Config):
     jwt.init_app(app)
     cors.init_app(app)
     
-    # Register blueprints (we'll add these later)
-    from .routes import auth_routes, user_routes, admin_routes
+    # Import and register blueprints
+    from .routes.auth_routes import bp as auth_bp
+    from .routes.user_routes import bp as user_bp
+    from .routes.admin_routes import bp as admin_bp
     
-    app.register_blueprint(auth_routes.bp)
-    app.register_blueprint(user_routes.bp)
-    app.register_blueprint(admin_routes.bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(user_bp)
+    app.register_blueprint(admin_bp)
     
     return app
