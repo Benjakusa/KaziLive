@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginStart, loginSuccess, loginFailure } from "../features/auth/authSlice";
+import {
+  loginStart,
+  loginSuccess,
+  loginFailure,
+} from "../features/auth/authSlice";
 import { loginUser } from "../services/api";
 import { useNavigate } from "react-router-dom";
 
@@ -25,9 +29,19 @@ function Login() {
     try {
       const data = await loginUser(form);
       dispatch(loginSuccess(data));
-      navigate("/dashboard");
+
+      // 🔥 Role-based redirect
+      if (data.user.role === "jobseeker") {
+        navigate("/jobseeker");
+      } else if (data.user.role === "employer") {
+        navigate("/employer");
+      } else if (data.user.role === "admin") {
+        navigate("/admin");
+      }
     } catch (err) {
-      dispatch(loginFailure(err.response?.data?.message || "Login failed"));
+      dispatch(
+        loginFailure(err.response?.data?.message || "Login failed")
+      );
     }
   };
 
@@ -40,6 +54,7 @@ function Login() {
           type="text"
           name="identifier"
           placeholder="Email / Username / Phone"
+          value={form.identifier}
           onChange={handleChange}
         />
 
@@ -47,6 +62,7 @@ function Login() {
           type="password"
           name="password"
           placeholder="Password"
+          value={form.password}
           onChange={handleChange}
         />
 
