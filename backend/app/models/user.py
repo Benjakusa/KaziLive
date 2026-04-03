@@ -1,6 +1,5 @@
 from .. import db
 from datetime import datetime
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum as SQLAlchemyEnum
 import enum
 
@@ -54,10 +53,11 @@ class Jobseeker(User):
     profile_verified = db.Column(db.Boolean, default=False)
     
     # Profile fields
+    
     full_name = db.Column(db.String(100))
     bio = db.Column(db.Text)
     location = db.Column(db.String(100))
-    skills = db.Column(db.ARRAY(db.String))  # PostgreSQL array for skills
+    skills = db.Column(db.JSON, default=list)
     
     # Relationships
     contacts = db.relationship('Contact', foreign_keys='Contact.jobseeker_id', backref='jobseeker', lazy=True)
