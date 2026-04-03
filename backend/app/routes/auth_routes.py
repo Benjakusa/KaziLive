@@ -1,8 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 from .. import db
 from ..models.user import User, Jobseeker, Employer, Admin, UserType
+from ..utils.email import generate_verification_token, get_token_expiry, send_verification_email
 
 bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -33,7 +35,11 @@ def register():
 
     password_hash = generate_password_hash(data['password'])
 
-    # Create the correct proxy model
+    # Generate 2FA verification token
+    token = generate_verification_token()
+    token_expiry = get_token_expiry()
+
+    # Create correct proxy model — account inactive until email verified
     if user_type == UserType.JOBSEEKER:
         user = Jobseeker(
             email=data['email'],
@@ -41,6 +47,9 @@ def register():
             phone=data['phone'],
             password_hash=password_hash,
             user_type=user_type,
+            is_active=False,
+            two_factor_token=token,
+            two_factor_expires=token_expiry,
         )
     elif user_type == UserType.EMPLOYER:
         user = Employer(
@@ -49,6 +58,9 @@ def register():
             phone=data['phone'],
             password_hash=password_hash,
             user_type=user_type,
+            is_active=False,
+            two_factor_token=token,
+            two_factor_expires=token_expiry,
             company_name=data.get('company_name', ''),
         )
     elif user_type == UserType.ADMIN:
@@ -58,30 +70,76 @@ def register():
             phone=data['phone'],
             password_hash=password_hash,
             user_type=user_type,
+            is_active=False,
+            two_factor_token=token,
+            two_factor_expires=token_expiry,
         )
-
-    if user is None:
-        return jsonify({'error': 'Failed to create user'}), 500
 
     db.session.add(user)
     db.session.commit()
 
+    # Send verification email (console for now)
+    send_verification_email(user.email, token)
+
     return jsonify({
-        'message': 'User registered successfully',
+        'message': 'Registration successful. Check your email for the verification token.',
+        'user': {
+            'id': user.id,
+            'email': user.email,
+            'username': user.username,
+            'user_type': user.user_type.value,
+            'is_active': user.is_active,
+        }
+    }), 201
+
+
+@bp.route('/verify-email', methods=['POST'])
+def verify_email():
+    """Step 2 — user submits token from email to activate account."""
+    data = request.get_json()
+
+    email = data.get('email')
+    token = data.get('token')
+
+    if not email or not token:
+        return jsonify({'error': 'email and token are required'}), 400
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    if user.is_active:
+        return jsonify({'message': 'Account already verified. Please login.'}), 200
+
+    if user.two_factor_token != token:
+        return jsonify({'error': 'Invalid verification token'}), 400
+
+    if datetime.utcnow() > user.two_factor_expires:
+        return jsonify({'error': 'Token has expired. Please register again.'}), 400
+
+    # Activate account
+    user.is_active = True
+    user.is_verified = True
+    user.two_factor_token = None
+    user.two_factor_expires = None
+    db.session.commit()
+
+    return jsonify({
+        'message': 'Email verified successfully. You can now login.',
         'user': {
             'id': user.id,
             'email': user.email,
             'username': user.username,
             'user_type': user.user_type.value,
         }
-    }), 201
+    }), 200
 
 
 @bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
 
-    # Accept identifier (email / username / phone) + password
     identifier = (
         data.get('identifier') or
         data.get('email') or
@@ -93,7 +151,6 @@ def login():
     if not identifier or not password:
         return jsonify({'error': 'identifier and password are required'}), 400
 
-    # Find user by any of the three identifiers
     user = (
         User.query.filter_by(email=identifier).first() or
         User.query.filter_by(username=identifier).first() or
@@ -104,9 +161,8 @@ def login():
         return jsonify({'error': 'Invalid credentials'}), 401
 
     if not user.is_active:
-        return jsonify({'error': 'Account is deactivated. Contact support.'}), 403
+        return jsonify({'error': 'Account not verified. Check your email for the verification token.'}), 403
 
-    # Issue JWT
     access_token = create_access_token(
         identity=str(user.id),
         additional_claims={
@@ -131,9 +187,8 @@ def login():
 @bp.route('/me', methods=['GET'])
 @jwt_required()
 def get_current_user():
-    """Protected route — confirms JWT is working."""
     user_id = get_jwt_identity()
-    user = User.query.get(int(user_id))
+    user = User.query.get(user_id)
 
     if not user:
         return jsonify({'error': 'User not found'}), 404
@@ -151,5 +206,5 @@ def get_current_user():
 
 @bp.route('/verify-2fa', methods=['POST'])
 def verify_2fa():
-    # Implemented in 2-Step Authentication task
-    return jsonify({'message': '2FA verification endpoint - coming soon'}), 200
+    # Alias for verify-email — same endpoint, different name
+    return verify_email()
