@@ -5,10 +5,6 @@ from ..models.user import UserType
 
 
 def role_required(*roles):
-    """
-    Decorator that checks JWT is valid AND user has one of the allowed roles.
-    Usage: @role_required(UserType.ADMIN) or @role_required(UserType.JOBSEEKER, UserType.EMPLOYER)
-    """
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):

@@ -19,8 +19,7 @@ def create_app(config_class=Config):
     jwt.init_app(app)
     cors.init_app(app)
 
-    # Import models so Alembic detects all tables
-    from .models import user, document, payment, contact  # ADD THIS LINE
+    from .models import user, document, payment, contact
 
     from .routes.main_routes import bp as main_bp
     from .routes.auth_routes import bp as auth_bp

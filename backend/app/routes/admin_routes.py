@@ -11,7 +11,6 @@ bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 @bp.route('/users', methods=['GET'])
 @admin_required
 def list_users():
-    """Admin only — list all users."""
     users = User.query.all()
     return jsonify([{
         'id': u.id,
@@ -27,7 +26,6 @@ def list_users():
 @bp.route('/documents', methods=['GET'])
 @admin_required
 def list_documents():
-    """Admin only — list all uploaded documents."""
     documents = Document.query.all()
     return jsonify([{
         'id': d.id,
@@ -41,7 +39,6 @@ def list_documents():
 @bp.route('/documents/<int:doc_id>/approve', methods=['PUT'])
 @admin_required
 def approve_document(doc_id):
-    """Admin only — approve a user-uploaded document."""
     document = Document.query.get(doc_id)
 
     if not document:
@@ -59,7 +56,6 @@ def approve_document(doc_id):
 @bp.route('/users/<int:user_id>/deactivate', methods=['PUT'])
 @admin_required
 def deactivate_user(user_id):
-    """Admin only — deactivate a user account."""
     user = User.query.get(user_id)
 
     if not user:
@@ -74,7 +70,6 @@ def deactivate_user(user_id):
 @bp.route('/users/<int:user_id>/activate', methods=['PUT'])
 @admin_required
 def activate_user(user_id):
-    """Admin only — reactivate a user account."""
     user = User.query.get(user_id)
 
     if not user:

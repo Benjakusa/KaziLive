@@ -22,12 +22,10 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # 2FA fields
     two_factor_token = db.Column(db.String(6), nullable=True)
     two_factor_expires = db.Column(db.DateTime, nullable=True)
     is_two_factor_enabled = db.Column(db.Boolean, default=False)
     
-    # Relationships
     documents = db.relationship('Document', backref='user', lazy=True, cascade='all, delete-orphan')
     
     __mapper_args__ = {
@@ -46,20 +44,16 @@ class Jobseeker(User):
     
     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     
-    # Jobseeker specific fields
     availability_status = db.Column(db.String(50), default='available')
     job_category = db.Column(db.String(100))
-    expected_salary = db.Column(db.Integer)  # Monthly salary expectation
+    expected_salary = db.Column(db.Integer)
     profile_verified = db.Column(db.Boolean, default=False)
-    
-    # Profile fields
     
     full_name = db.Column(db.String(100))
     bio = db.Column(db.Text)
     location = db.Column(db.String(100))
     skills = db.Column(db.JSON, default=list)
     
-    # Relationships
     contacts = db.relationship('Contact', foreign_keys='Contact.jobseeker_id', backref='jobseeker', lazy=True)
 
 class Employer(User):
@@ -70,18 +64,15 @@ class Employer(User):
     
     id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
     
-    # Employer specific fields
     company_name = db.Column(db.String(100))
     company_description = db.Column(db.Text)
     company_location = db.Column(db.String(100))
     verified = db.Column(db.Boolean, default=False)
     verified_at = db.Column(db.DateTime, nullable=True)
     
-    # Payment fields
     payment_transaction_id = db.Column(db.String(100), nullable=True)
     payment_status = db.Column(db.String(50), default='pending')
     
-    # Relationships
     contacts = db.relationship('Contact', foreign_keys='Contact.employer_id', backref='employer', lazy=True)
 
 class Admin(User):

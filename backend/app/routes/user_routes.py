@@ -26,7 +26,6 @@ def get_profile():
         'created_at': user.created_at.isoformat(),
     }
 
-    # Append role-specific fields
     if user.user_type == UserType.JOBSEEKER:
         jobseeker = Jobseeker.query.get(user_id)
         base.update({
@@ -55,7 +54,6 @@ def get_profile():
 @bp.route('/jobseeker/profile', methods=['GET'])
 @jobseeker_required
 def jobseeker_profile():
-    """Jobseeker-only profile endpoint."""
     user_id = get_jwt_identity()
     jobseeker = Jobseeker.query.get(user_id)
 
@@ -80,7 +78,6 @@ def jobseeker_profile():
 @bp.route('/employer/profile', methods=['GET'])
 @employer_required
 def employer_profile():
-    """Employer-only profile endpoint."""
     user_id = get_jwt_identity()
     employer = Employer.query.get(user_id)
 
