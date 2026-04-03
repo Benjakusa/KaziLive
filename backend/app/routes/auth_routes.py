@@ -13,13 +13,11 @@ bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 def register():
     data = request.get_json()
 
-    # Validate required fields
     required = ['email', 'username', 'phone', 'password', 'user_type']
     for field in required:
         if not data.get(field):
             return jsonify({'error': f'{field} is required'}), 400
 
-    # Check uniqueness
     if User.query.filter_by(email=data['email']).first():
         return jsonify({'error': 'Email already registered'}), 409
     if User.query.filter_by(username=data['username']).first():
@@ -27,7 +25,6 @@ def register():
     if User.query.filter_by(phone=data['phone']).first():
         return jsonify({'error': 'Phone number already registered'}), 409
 
-    # Validate user_type
     try:
         user_type = UserType(data['user_type'])
     except ValueError:
@@ -35,11 +32,9 @@ def register():
 
     password_hash = generate_password_hash(data['password'])
 
-    # Generate 2FA verification token
     token = generate_verification_token()
     token_expiry = get_token_expiry()
 
-    # Create correct proxy model — account inactive until email verified
     if user_type == UserType.JOBSEEKER:
         user = Jobseeker(
             email=data['email'],
@@ -78,7 +73,6 @@ def register():
     db.session.add(user)
     db.session.commit()
 
-    # Send verification email (console for now)
     send_verification_email(user.email, token)
 
     return jsonify({
@@ -95,7 +89,6 @@ def register():
 
 @bp.route('/verify-email', methods=['POST'])
 def verify_email():
-    """Step 2 — user submits token from email to activate account."""
     data = request.get_json()
 
     email = data.get('email')
@@ -118,7 +111,6 @@ def verify_email():
     if datetime.utcnow() > user.two_factor_expires:
         return jsonify({'error': 'Token has expired. Please register again.'}), 400
 
-    # Activate account
     user.is_active = True
     user.is_verified = True
     user.two_factor_token = None
@@ -206,5 +198,4 @@ def get_current_user():
 
 @bp.route('/verify-2fa', methods=['POST'])
 def verify_2fa():
-    # Alias for verify-email — same endpoint, different name
     return verify_email()

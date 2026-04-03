@@ -7,17 +7,14 @@ from flask import current_app
 
 
 def generate_verification_token(length=6):
-    """Generate a 6-digit numeric token."""
     return ''.join(random.choices(string.digits, k=length))
 
 
 def get_token_expiry(minutes=30):
-    """Token valid for 30 minutes."""
     return datetime.utcnow() + timedelta(minutes=minutes)
 
 
 def _send_email(to_email, subject, html_content):
-    """Core SendGrid send function."""
     try:
         sg = SendGridAPIClient(current_app.config['SENDGRID_API_KEY'])
         from_email = Email(
@@ -29,15 +26,14 @@ def _send_email(to_email, subject, html_content):
         mail = Mail(from_email, to, subject, content)
 
         response = sg.client.mail.send.post(request_body=mail.get())
-        print(f"[SendGrid] Email sent to {to_email} | Status: {response.status_code}")
+        print(f"email sent to {to_email}, status: {response.status_code}")
         return True
     except Exception as e:
-        print(f"[SendGrid] Failed to send email to {to_email} | Error: {str(e)}")
+        print(f"failed to send email to {to_email}: {e}")
         return False
 
 
 def send_verification_email(email, token):
-    """Send 2-step verification email with token."""
     subject = "KaziLive - Verify Your Email"
     html_content = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -56,7 +52,6 @@ def send_verification_email(email, token):
 
 
 def send_payment_notification_email(email, amount, transaction_id):
-    """Send payment confirmation email."""
     subject = "KaziLive - Payment Confirmation"
     html_content = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

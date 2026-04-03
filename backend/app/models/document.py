@@ -8,9 +8,9 @@ class Document(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     file_name = db.Column(db.String(255), nullable=False)
     file_url = db.Column(db.String(500), nullable=False)
-    file_type = db.Column(db.String(50))  # CV, certificate, etc.
-    file_size = db.Column(db.Integer)  # in bytes
-    status = db.Column(db.String(50), default='pending')  # pending, approved, rejected
+    file_type = db.Column(db.String(50))
+    file_size = db.Column(db.Integer)
+    status = db.Column(db.String(50), default='pending')
     approved_by = db.Column(db.Integer, db.ForeignKey('admins.id'), nullable=True)
     approved_at = db.Column(db.DateTime, nullable=True)
     rejection_reason = db.Column(db.Text, nullable=True)
