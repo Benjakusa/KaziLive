@@ -5,7 +5,6 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from .config import Config
 
-# Initialize extensions
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
@@ -15,13 +14,14 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
     
-    # Initialize extensions with app
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     cors.init_app(app)
-    
-    # Import and register blueprints
+
+    # Import models so Alembic detects all tables
+    from .models import user, document, payment, contact  # ADD THIS LINE
+
     from .routes.main_routes import bp as main_bp
     from .routes.auth_routes import bp as auth_bp
     from .routes.user_routes import bp as user_bp
