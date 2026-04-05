@@ -52,6 +52,7 @@ def search_jobseekers():
     user = User.query.get(user_id)
     if user.user_type.value.lower() != 'employer':
         return jsonify({'error': 'Only employers can access this endpoint'}), 403
+    
     employer = Employer.query.filter_by(id=user_id).first()
     if not employer:
         return jsonify({'error': 'Employer profile not found'}), 404
@@ -66,22 +67,27 @@ def search_jobseekers():
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
     
-    query = Jobseeker.query.join(User).filter(User.is_active == True)
-    if job_category:
-        query = query.filter(Jobseeker.job_category == job_category)
-    if availability:
-        query = query.filter(Jobseeker.availability_status == availability)
-    if min_salary:
-        query = query.filter(Jobseeker.expected_salary >= min_salary)
-    if max_salary:
-        query = query.filter(Jobseeker.expected_salary <= max_salary)
-    if location:
-        query = query.filter(Jobseeker.location.ilike(f'%{location}%'))
+    # Get all jobseekers and filter in Python (avoids SQL join issues)
+    all_jobseekers = Jobseeker.query.all()
     
-    paginated = query.paginate(page=page, per_page=per_page, error_out=False)
-    jobseekers = []
-    for js in paginated.items:
-        jobseekers.append({
+    results = []
+    for js in all_jobseekers:
+        user_info = User.query.get(js.id)
+        if not user_info or not user_info.is_active:
+            continue
+        
+        if job_category and js.job_category != job_category:
+            continue
+        if availability and js.availability_status != availability:
+            continue
+        if min_salary and (js.expected_salary is None or js.expected_salary < min_salary):
+            continue
+        if max_salary and (js.expected_salary is None or js.expected_salary > max_salary):
+            continue
+        if location and location.lower() not in (js.location or '').lower():
+            continue
+        
+        results.append({
             'id': js.id,
             'full_name': js.full_name,
             'job_category': js.job_category,
@@ -90,15 +96,21 @@ def search_jobseekers():
             'location': js.location,
             'skills': js.skills
         })
+    
+    start = (page - 1) * per_page
+    end = start + per_page
+    paginated_items = results[start:end]
+    total_pages = (len(results) + per_page - 1) // per_page
+    
     return jsonify({
-        'jobseekers': jobseekers,
+        'jobseekers': paginated_items,
         'pagination': {
             'page': page,
             'per_page': per_page,
-            'total': paginated.total,
-            'pages': paginated.pages,
-            'has_next': paginated.has_next,
-            'has_prev': paginated.has_prev
+            'total': len(results),
+            'pages': total_pages,
+            'has_next': page < total_pages,
+            'has_prev': page > 1
         }
     }), 200
 
@@ -147,13 +159,10 @@ def contact_jobseeker(jobseeker_id):
     jobseeker = Jobseeker.query.get(jobseeker_id)
     if not jobseeker:
         return jsonify({'error': 'Jobseeker not found'}), 404
-    
     message = data.get('message')
     if not message or len(message) < 10:
         return jsonify({'error': 'Message must be at least 10 characters'}), 400
-    
     contact_method = data.get('contact_method', 'email')
-    
     contact = Contact(
         employer_id=employer.id,
         jobseeker_id=jobseeker_id,
@@ -163,7 +172,6 @@ def contact_jobseeker(jobseeker_id):
     )
     db.session.add(contact)
     db.session.commit()
-    
     return jsonify({
         'message': 'Message sent successfully',
         'contact_id': contact.id
