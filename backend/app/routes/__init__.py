@@ -1,5 +1,2 @@
-from . import auth_routes
-from . import user_routes
-from . import admin_routes
-
-__all__ = ['auth_routes', 'user_routes', 'admin_routes']
+# Routes package
+# Blueprints are imported in app/__init__.py to avoid circular imports
