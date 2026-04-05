@@ -22,3 +22,8 @@ venv/
 .pytest_cache/
 .coverage
 htmlcov/
+
+venv/
+backend/venv/
+__pycache__/
+*.pyc
