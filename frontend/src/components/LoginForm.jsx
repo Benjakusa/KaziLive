@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { login } from '../services/api.js';
 
 export default function LoginForm({ userType }) {
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -7,28 +8,16 @@ export default function LoginForm({ userType }) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`${userType} login submitted: ${formData.username}`);
-    // TODO: connect to backend API
+    const result = await login(userType, formData);
+    alert(JSON.stringify(result));
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        name="username"
-        placeholder="Username / Email / Phone"
-        value={formData.username}
-        onChange={handleChange}
-      />
-      <input
-        type="password"
-        name="password"
-        placeholder="Password"
-        value={formData.password}
-        onChange={handleChange}
-      />
+      <input type="text" name="username" placeholder="Username / Email / Phone" onChange={handleChange} />
+      <input type="password" name="password" placeholder="Password" onChange={handleChange} />
       <button type="submit">Login</button>
     </form>
   );

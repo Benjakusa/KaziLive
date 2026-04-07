@@ -1,4 +1,3 @@
-// Centralized API calls
 export async function login(userType, credentials) {
   const response = await fetch(`/api/${userType}/login`, {
     method: 'POST',
