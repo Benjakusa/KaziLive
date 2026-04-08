@@ -51,4 +51,4 @@ build/
 .eggs/
 
 # Gunicorn
-*.pid
+*.pid.env
