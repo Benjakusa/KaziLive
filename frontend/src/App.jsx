@@ -1,34 +1,35 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+// Employer pages
+import EmployerLogin from './pages/EmployerLogin.jsx';
+import EmployerSearch from './pages/EmployerSearch.jsx';
+import EmployerProfileView from './pages/EmployerProfileView.jsx';
+import EmployerContact from './pages/EmployerContact.jsx';
 
-import EmployerDashboard from "./pages/employer/EmployerDashboard";
-import JobseekerProfile from "./pages/employer/JobseekerProfile";
+// Jobseeker pages
+import JobseekerLogin from './pages/JobseekerLogin.jsx';
+import JobseekerProfile from './pages/JobseekerProfile.jsx';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/" element={<h1>Welcome to KaziLive</h1>} />
 
-        <Route path="/employer" element={<EmployerDashboard />} />
-        <Route path="/employer/profile/:id" element={<JobseekerProfile />} />
+        {/* Jobseeker Routes */}
+        <Route path="/jobseeker/login" element={<JobseekerLogin />} />
+        <Route path="/jobseeker/profile" element={<JobseekerProfile />} />
+        <Route path="/jobseeker/profile/:id" element={<JobseekerProfile />} />
+
+        {/* Employer Routes */}
+        <Route path="/employer/login" element={<EmployerLogin />} />
+        <Route path="/employer/search" element={<EmployerSearch />} />
+        <Route path="/employer/profile/:id" element={<EmployerProfileView />} />
+        <Route path="/employer/contact/:id" element={<EmployerContact />} />
       </Routes>
     </Router>
   );
 }
 
-export default App; 
-import React from 'react'
-
-function App() {
-  return (
-    <div>
-      <h1>Welcome to KaziLive</h1>
-    </div>
-  )
-}
-
-export default App
+export default App;

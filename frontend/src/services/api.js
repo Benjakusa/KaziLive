@@ -1,16 +1,16 @@
-export const loginUser = async (credentials) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        user: {
-          name: "Lenny",
-          role: "jobseeker",
-        },
-        token: "fake-token-123",
-      });
-    }, 1000);
+// ─── REAL API CALLS (main branch) ───────────────────────────────────────────
+
+export async function login(userType, credentials) {
+  const response = await fetch(`/api/${userType}/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials),
   });
-}; 
+  return response.json();
+}
+
+// ─── MOCK FUNCTIONS (keep until backend endpoints are ready) ─────────────────
+
 export const updateProfile = async (data) => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -18,31 +18,16 @@ export const updateProfile = async (data) => {
       resolve({ message: "Profile updated" });
     }, 1000);
   });
-}; 
-// MOCK JOBSEEKERS
+};
+
 export const getJobseekers = async () => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve([
-        {
-          id: 1,
-          name: "John Doe",
-          jobCategory: "Frontend Developer",
-          salary: "500 USD",
-        },
-        {
-          id: 2,
-          name: "Jane Smith",
-          jobCategory: "Backend Developer",
-          salary: "700 USD",
-        },
-        {
-          id: 3,
-          name: "Mike Johnson",
-          jobCategory: "UI/UX Designer",
-          salary: "600 USD",
-        },
+        { id: 1, name: "John Doe", jobCategory: "Frontend Developer", salary: "500 USD" },
+        { id: 2, name: "Jane Smith", jobCategory: "Backend Developer", salary: "700 USD" },
+        { id: 3, name: "Mike Johnson", jobCategory: "UI/UX Designer", salary: "600 USD" },
       ]);
     }, 1000);
   });
-}; 
+};
