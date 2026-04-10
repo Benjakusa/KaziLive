@@ -21,7 +21,7 @@ function EmployerDashboard() {
       <div className="card">
         <div className="card-header">
           <Search size={24} />
-          <h2>Tafuta Wafanyakazi</h2>
+          <h2>Search Employees</h2>
         </div>
         <div className="card-body">
           <div style={{ position: 'relative' }}>

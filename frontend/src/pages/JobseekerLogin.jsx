@@ -29,14 +29,14 @@ export default function JobseekerLogin() {
               Sign In
             </button>
             <p className="text-center mt-4 text-muted">
-              Hujajisajili? <a href="#" style={{ color: 'var(--primary)' }}>Jisajili hapa</a>
+              Don't have an account? <a href="#/jobseeker/register" style={{ color: 'var(--primary)' }}>Register here</a>
             </p>
           </form>
         </div>
       </div>
       <div className="card">
         <div className="card-header">
-          <h3>Pata Kazi Haraka</h3>
+          <h3>Find Jobs Quickly</h3>
         </div>
         <div className="card-body">
           <ul style={{ listStyle: 'none', padding: 0 }}>

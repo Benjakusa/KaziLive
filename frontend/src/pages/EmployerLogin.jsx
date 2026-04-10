@@ -28,6 +28,9 @@ export default function EmployerLogin() {
             <button type="submit" className="btn btn-primary btn-block">
               Sign In
             </button>
+            <p className="text-center mt-4 text-muted">
+              Don't have an account? <a href="#/employer/register" style={{ color: 'var(--primary)' }}>Register here</a>
+            </p>
           </form>
         </div>
       </div>
