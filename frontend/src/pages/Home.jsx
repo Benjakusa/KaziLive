@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Briefcase, Users, Search, CheckCircle, Shield,
-  ArrowRight, MapPin, Mail, Phone,
-  UserCheck, MessageSquare
-} from 'lucide-react';
+import { Users, Search, Shield, UserCheck, MessageSquare } from 'lucide-react';
 
 const featuredTalents = [
   { id: 1, name: 'Amina Ochieng', role: 'Software Engineer', skills: ['React', 'Node.js', 'Python'], experience: '5 years', location: 'Nairobi', verified: true },
@@ -18,12 +14,7 @@ function Home() {
 
   return (
     <div className="home-page">
-      {/* Hero Section */}
       <section className="hero-section">
-        <div className="hero-background">
-          <div className="hero-pattern"></div>
-          <div className="hero-gradient"></div>
-        </div>
         <div className="hero-container">
           <div className="hero-content">
             <span className="hero-badge">
@@ -47,25 +38,6 @@ function Home() {
                 Get Discovered
               </Link>
             </div>
-            <div className="hero-search">
-              <div className="search-bar">
-                <Search size={20} />
-                <input
-                  type="text"
-                  placeholder="Search by skills, job category, or location..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <button className="search-btn">Search</button>
-              </div>
-              <div className="search-tags">
-                <span>Popular:</span>
-                <span className="tag">Software Engineer</span>
-                <span className="tag">Marketing</span>
-                <span className="tag">Data Analyst</span>
-                <span className="tag">Nairobi</span>
-              </div>
-            </div>
           </div>
           <div className="hero-visual">
             <div className="floating-cards">
@@ -83,21 +55,14 @@ function Home() {
                   <span className="role">Verified ✓</span>
                 </div>
               </div>
-              <div className="card-float card-3">
-                <div className="stats-badge">
-                  <span className="number">500+</span>
-                  <span className="label">Verified</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="how-it-works">
+      <section className="how-it-works py-5">
         <div className="section-container">
-          <div className="section-header">
+          <div className="section-header text-center mb-5">
             <span className="section-tag">Simple Process</span>
             <h2>How KaziLive Works</h2>
             <p>Get started in minutes with our streamlined process</p>
@@ -139,10 +104,9 @@ function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="footer">
-        <div className="footer-bottom">
-          <p>&copy; 2024 KaziLive. All rights reserved.</p>
+      <footer className="footer py-4">
+        <div className="footer-bottom text-center">
+          <p>&copy; {new Date().getFullYear()} KaziLive. All rights reserved.</p>
         </div>
       </footer>
     </div>

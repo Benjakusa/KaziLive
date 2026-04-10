@@ -24,12 +24,11 @@ export default function EmployerContact() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Your Message</label>
-            <textarea 
-              className="form-input" 
-              rows="6" 
-              placeholder="Write your message here..." 
+            <textarea
+              className="form-input"
+              rows="6"
+              placeholder="Write your message here..."
               onChange={(e) => setMessage(e.target.value)}
-              style={{ resize: 'vertical' }}
             />
           </div>
           <button type="submit" className="btn btn-primary">

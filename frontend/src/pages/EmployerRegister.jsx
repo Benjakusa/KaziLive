@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Building, Phone, MapPin, User, LogIn } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Mail, Lock, Building, Phone, MapPin, LogIn } from 'lucide-react';
 
 export default function EmployerRegister() {
   const [formData, setFormData] = useState({
@@ -35,99 +36,111 @@ export default function EmployerRegister() {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label">
-                <Building size={16} style={{ marginRight: '8px' }} />
                 Company Name
               </label>
-              <input 
-                type="text" 
-                name="companyName"
-                className="form-input" 
-                placeholder="Your Company Ltd"
-                value={formData.companyName}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-icon-wrapper">
+                <Building size={18} />
+                <input
+                  type="text"
+                  name="companyName"
+                  className="form-input"
+                  placeholder="Your Company Ltd"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
             <div className="form-group">
               <label className="form-label">
-                <Mail size={16} style={{ marginRight: '8px' }} />
                 Business Email
               </label>
-              <input 
-                type="email" 
-                name="email"
-                className="form-input" 
-                placeholder="hr@company.co.ke"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-icon-wrapper">
+                <Mail size={18} />
+                <input
+                  type="email"
+                  name="email"
+                  className="form-input"
+                  placeholder="hr@company.co.ke"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
             <div className="form-group">
               <label className="form-label">
-                <Phone size={16} style={{ marginRight: '8px' }} />
                 Phone Number
               </label>
-              <input 
-                type="tel" 
-                name="phone"
-                className="form-input" 
-                placeholder="0722 000 000"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-icon-wrapper">
+                <Phone size={18} />
+                <input
+                  type="tel"
+                  name="phone"
+                  className="form-input"
+                  placeholder="0722 000 000"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
             <div className="form-group">
               <label className="form-label">
-                <MapPin size={16} style={{ marginRight: '8px' }} />
                 Company Location
               </label>
-              <input 
-                type="text" 
-                name="location"
-                className="form-input" 
-                placeholder="Nairobi, Kenya"
-                value={formData.location}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-icon-wrapper">
+                <MapPin size={18} />
+                <input
+                  type="text"
+                  name="location"
+                  className="form-input"
+                  placeholder="Nairobi, Kenya"
+                  value={formData.location}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
             <div className="form-group">
               <label className="form-label">
-                <Lock size={16} style={{ marginRight: '8px' }} />
                 Password
               </label>
-              <input 
-                type="password" 
-                name="password"
-                className="form-input" 
-                placeholder="Create a password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-icon-wrapper">
+                <Lock size={18} />
+                <input
+                  type="password"
+                  name="password"
+                  className="form-input"
+                  placeholder="Create a password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
             <div className="form-group">
               <label className="form-label">
-                <Lock size={16} style={{ marginRight: '8px' }} />
                 Confirm Password
               </label>
-              <input 
-                type="password" 
-                name="confirmPassword"
-                className="form-input" 
-                placeholder="Confirm your password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-icon-wrapper">
+                <Lock size={18} />
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  className="form-input"
+                  placeholder="Confirm your password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
             <button type="submit" className="btn btn-primary btn-block">
               Register Company
             </button>
             <p className="text-center mt-4 text-muted">
-              Already have an account? <a href="#/employer/login" style={{ color: 'var(--primary)' }}>Sign in</a>
+              Already have an account? <Link to="/employer/login" style={{ color: 'var(--primary)' }}>Sign in</Link>
             </p>
           </form>
         </div>
@@ -137,21 +150,21 @@ export default function EmployerRegister() {
           <h3>Why Join KaziLive?</h3>
         </div>
         <div className="card-body">
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ padding: '12px 0', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: 'var(--primary)' }}>1</span>
+          <ul className="list-unstyled">
+            <li className="py-3 divider-b flex-center-gap">
+              <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>1</span>
               Access thousands of verified candidates
             </li>
-            <li style={{ padding: '12px 0', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: 'var(--primary)' }}>2</span>
+            <li className="py-3 divider-b flex-center-gap">
+              <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>2</span>
               Post jobs and manage applications
             </li>
-            <li style={{ padding: '12px 0', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: 'var(--primary)' }}>3</span>
+            <li className="py-3 divider-b flex-center-gap">
+              <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>3</span>
               Direct contact with job seekers
             </li>
-            <li style={{ padding: '12px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ color: 'var(--primary)' }}>4</span>
+            <li className="py-3 flex-center-gap">
+              <span style={{ color: 'var(--primary)', fontWeight: 'bold' }}>4</span>
               Pay via M-Pesa - fast and secure
             </li>
           </ul>

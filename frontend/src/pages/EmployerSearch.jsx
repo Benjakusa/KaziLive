@@ -20,9 +20,9 @@ export default function EmployerSearch() {
         </div>
         <div className="card-body">
           <div className="filters">
-            <div style={{ position: 'relative', flex: 1 }}>
-              <Search size={18} className="search-icon" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-              <input type="text" className="form-input" placeholder="Search by name, skill, or category..." style={{ paddingLeft: '40px' }} />
+            <div className="input-icon-wrapper" style={{ flex: 1 }}>
+              <Search size={18} className="search-icon" />
+              <input type="text" className="form-input" placeholder="Search by name, skill, or category..." />
             </div>
             <button className="btn btn-secondary">
               <Filter size={18} />

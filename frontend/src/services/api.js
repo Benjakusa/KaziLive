@@ -1,5 +1,3 @@
-// ─── REAL API CALLS (main branch) ───────────────────────────────────────────
-
 export async function login(userType, credentials) {
   const response = await fetch(`/api/${userType}/login`, {
     method: 'POST',
@@ -9,7 +7,10 @@ export async function login(userType, credentials) {
   return response.json();
 }
 
-// ─── MOCK FUNCTIONS (keep until backend endpoints are ready) ─────────────────
+/**
+ * MOCK FUNCTIONS
+ * These should be replaced by real API endpoints in production.
+ */
 
 export const updateProfile = async (data) => {
   return new Promise((resolve) => {

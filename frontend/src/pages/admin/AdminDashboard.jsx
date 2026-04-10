@@ -93,10 +93,10 @@ function AdminDashboard() {
   ];
 
   return (
-    <div className="admin-container">
+    <div className="admin-layout">
       <aside className="admin-sidebar">
-        <div className="admin-logo">
-          <Shield size={24} />
+        <div className="admin-sidebar-header">
+          <Shield size={24} style={{ color: 'var(--primary)' }} />
           <span>Admin Portal</span>
         </div>
         <nav className="admin-nav">
@@ -111,7 +111,7 @@ function AdminDashboard() {
             </button>
           ))}
         </nav>
-        <button className="admin-logout" onClick={handleLogout}>
+        <button className="admin-nav-item" onClick={handleLogout} style={{ marginTop: 'auto', borderTop: '1px solid var(--border)' }}>
           <LogOut size={18} />
           Logout
         </button>

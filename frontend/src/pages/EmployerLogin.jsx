@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Mail, Lock, LogIn } from 'lucide-react';
 
 export default function EmployerLogin() {
@@ -13,23 +14,23 @@ export default function EmployerLogin() {
           <form>
             <div className="form-group">
               <label className="form-label">Email Address</label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                <input type="email" className="form-input" placeholder="hr@company.co.ke" style={{ paddingLeft: '40px' }} />
+              <div className="input-icon-wrapper">
+                <Mail size={18} />
+                <input type="email" className="form-input" placeholder="hr@company.co.ke" />
               </div>
             </div>
             <div className="form-group">
               <label className="form-label">Password</label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
-                <input type="password" className="form-input" placeholder="Enter your password" style={{ paddingLeft: '40px' }} />
+              <div className="input-icon-wrapper">
+                <Lock size={18} />
+                <input type="password" className="form-input" placeholder="Enter your password" />
               </div>
             </div>
             <button type="submit" className="btn btn-primary btn-block">
               Sign In
             </button>
             <p className="text-center mt-4 text-muted">
-              Don't have an account? <a href="#/employer/register" style={{ color: 'var(--primary)' }}>Register here</a>
+              Don't have an account? <Link to="/employer/register" style={{ color: 'var(--primary)' }}>Register here</Link>
             </p>
           </form>
         </div>
@@ -39,14 +40,14 @@ export default function EmployerLogin() {
           <h3>Why Join KaziLive?</h3>
         </div>
         <div className="card-body">
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
+          <ul className="list-unstyled">
+            <li className="py-3 divider-b">
               Access thousands of qualified Kenyan candidates
             </li>
-            <li style={{ padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
+            <li className="py-3 divider-b">
               Post jobs and manage applications
             </li>
-            <li style={{ padding: '12px 0' }}>
+            <li className="py-3">
               Pay via M-Pesa - fast and secure
             </li>
           </ul>

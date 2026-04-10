@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Briefcase, User, Search, Menu, X } from 'lucide-react';
+import { Briefcase, User, Search, Menu, X, Shield } from 'lucide-react';
 
 import Home from './pages/Home.jsx';
 import EmployerLogin from './pages/EmployerLogin.jsx';
@@ -49,6 +49,10 @@ function App() {
               <Link to="/employer/search" className="nav-link" onClick={() => setMenuOpen(false)}>
                 <Search size={18} />
                 Find Talent
+              </Link>
+              <Link to="/admin/login" className="nav-link" onClick={() => setMenuOpen(false)}>
+                <Shield size={18} />
+                Admin
               </Link>
             </div>
           </div>

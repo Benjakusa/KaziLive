@@ -3,9 +3,9 @@ import { Filter } from 'lucide-react';
 
 export default function EmployerFilters() {
   return (
-    <div className="card" style={{ marginBottom: '20px' }}>
+    <div className="card" style={{ marginBottom: '24px' }}>
       <div className="card-body">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+        <div className="flex-center-gap" style={{ marginBottom: '16px' }}>
           <Filter size={20} />
           <strong>Advanced Filters</strong>
         </div>
