@@ -19,7 +19,7 @@ function UploadFile() {
     try {
       const res = await uploadFile(file);
       setMessage(res.message);
-    } catch (error) {
+    } catch {
       setMessage("Upload failed");
     }
   }

@@ -16,9 +16,9 @@ export default function LoginForm({ userType }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input type="text" name="username" placeholder="Username / Email / Phone" onChange={handleChange} />
-      <input type="password" name="password" placeholder="Password" onChange={handleChange} />
-      <button type="submit">Login</button>
+      <input type="text" name="username" placeholder="0712 345 678 au email" onChange={handleChange} />
+      <input type="password" name="password" placeholder="Nenosiri" onChange={handleChange} />
+      <button type="submit" className="btn btn-primary btn-block">Ingia</button>
     </form>
   );
 }
