@@ -1,3 +1,5 @@
+// ─── REAL API CALLS (main branch) ───────────────────────────────────────────
+
 export async function login(userType, credentials) {
   const response = await fetch(`/api/${userType}/login`, {
     method: 'POST',
@@ -6,3 +8,26 @@ export async function login(userType, credentials) {
   });
   return response.json();
 }
+
+// ─── MOCK FUNCTIONS (keep until backend endpoints are ready) ─────────────────
+
+export const updateProfile = async (data) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log("Saved:", data);
+      resolve({ message: "Profile updated" });
+    }, 1000);
+  });
+};
+
+export const getJobseekers = async () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        { id: 1, name: "John Doe", jobCategory: "Frontend Developer", salary: "500 USD" },
+        { id: 2, name: "Jane Smith", jobCategory: "Backend Developer", salary: "700 USD" },
+        { id: 3, name: "Mike Johnson", jobCategory: "UI/UX Designer", salary: "600 USD" },
+      ]);
+    }, 1000);
+  });
+};
