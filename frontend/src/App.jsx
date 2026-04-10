@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Briefcase, Users, User, Search, Menu, X } from 'lucide-react';
 
@@ -11,28 +11,38 @@ import JobseekerLogin from './pages/JobseekerLogin.jsx';
 import JobseekerProfile from './pages/JobseekerProfile.jsx';
 
 function App() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <Router>
       <div className="app-container">
         <nav className="navbar">
           <Link to="/" className="navbar-brand">
-            <Briefcase size={28} />
-            <span>KaziLive</span>
+            <Briefcase size={28} style={{ color: "var(--accent)" }} />
+            <div style={{ display: "flex", gap: "2px" }}>
+              <span style={{ color: "#000000" }}>Kazi</span>
+              <span style={{ color: "var(--accent)", fontWeight: "800" }}>Live</span>
+            </div>
           </Link>
-          <div className="nav-links">
-            <Link to="/jobseeker/login" className="nav-link">
+
+          <button className="mobile-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          <div className={`nav-links ${menuOpen ? 'show' : ''}`}>
+            <Link to="/jobseeker/login" className="nav-link" onClick={() => setMenuOpen(false)}>
               <User size={18} />
               Jobseeker
             </Link>
-            <Link to="/jobseeker/profile" className="nav-link">
+            <Link to="/jobseeker/profile" className="nav-link" onClick={() => setMenuOpen(false)}>
               <Users size={18} />
               Profile
             </Link>
-            <Link to="/employer/login" className="nav-link">
+            <Link to="/employer/login" className="nav-link" onClick={() => setMenuOpen(false)}>
               <User size={18} />
               Employer
             </Link>
-            <Link to="/employer/search" className="nav-link">
+            <Link to="/employer/search" className="nav-link" onClick={() => setMenuOpen(false)}>
               <Search size={18} />
               Find Talent
             </Link>

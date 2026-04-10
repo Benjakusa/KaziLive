@@ -1,15 +1,16 @@
 :root {
-  --primary: #2563eb;
-  --primary-dark: #1d4ed8;
-  --secondary: #64748b;
+  --primary: #800000;
+  --primary-dark: #5c0000;
+  --secondary: #333333;
+  --accent: #cc0000;
   --success: #10b981;
   --danger: #ef4444;
   --warning: #f59e0b;
   --background: #f8fafc;
   --surface: #ffffff;
   --border: #e2e8f0;
-  --text-primary: #0f172a;
-  --text-secondary: #64748b;
+  --text-primary: #111111;
+  --text-secondary: #666666;
   --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
@@ -21,7 +22,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   background-color: var(--background);
   color: var(--text-primary);
   line-height: 1.6;
@@ -59,12 +60,50 @@ body {
 }
 
 .navbar-brand svg {
-  color: var(--primary);
+  color: var(--accent);
+}
+
+.mobile-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  padding: 8px;
 }
 
 .nav-links {
   display: flex;
   gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .mobile-toggle {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    flex-direction: column;
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    gap: 12px;
+  }
+
+  .nav-links.show {
+    display: flex;
+  }
+
+  .nav-link {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .nav-link {
@@ -132,7 +171,8 @@ body {
   gap: 12px;
 }
 
-.card-header h2, .card-header h3 {
+.card-header h2,
+.card-header h3 {
   margin: 0;
 }
 
@@ -163,7 +203,7 @@ body {
 .form-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(128, 0, 0, 0.1);
 }
 
 .btn {
@@ -291,4 +331,61 @@ body {
 
 .search-icon {
   color: var(--text-secondary);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 20px 16px;
+  }
+
+  .hero {
+    padding: 40px 16px;
+  }
+
+  .hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .jobseeker-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px 16px;
+  }
+
+  .jobseeker-card .btn {
+    width: 100%;
+  }
+
+  .card-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0 16px;
+  }
+
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+
+  .hero h1 {
+    font-size: 1.5rem;
+  }
 }
