@@ -10,6 +10,9 @@ import EmployerContact from './pages/EmployerContact.jsx';
 import JobseekerLogin from './pages/JobseekerLogin.jsx';
 import JobseekerProfile from './pages/JobseekerProfile.jsx';
 
+import AdminDashboard from './pages/admin/AdminDashboard.jsx';
+import AdminLogin from './pages/admin/AdminLogin.jsx';
+
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -66,6 +69,9 @@ function App() {
             <Route path="/employer/search" element={<EmployerSearch />} />
             <Route path="/employer/profile/:id" element={<EmployerProfileView />} />
             <Route path="/employer/contact/:id" element={<EmployerContact />} />
+
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Routes>
         </main>
       </div>
