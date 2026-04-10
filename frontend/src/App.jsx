@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Briefcase, Users, User, Search, Menu, X } from 'lucide-react';
 
+import Home from './pages/Home.jsx';
 import EmployerLogin from './pages/EmployerLogin.jsx';
 import EmployerSearch from './pages/EmployerSearch.jsx';
 import EmployerProfileView from './pages/EmployerProfileView.jsx';
@@ -54,12 +55,7 @@ function App() {
 
         <main className="main-content">
           <Routes>
-            <Route path="/" element={
-              <div className="hero">
-                <h1>Find Your Next Opportunity</h1>
-                <p>Connect with top employers and kickstart your career journey</p>
-              </div>
-            } />
+            <Route path="/" element={<Home />} />
 
             <Route path="/jobseeker/login" element={<JobseekerLogin />} />
             <Route path="/jobseeker/profile" element={<JobseekerProfile />} />
