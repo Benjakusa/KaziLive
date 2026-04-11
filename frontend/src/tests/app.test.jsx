@@ -26,13 +26,13 @@ const renderWithProviders = (component, store = createTestStore()) => {
 describe('App Component', () => {
   it('renders navigation links', () => {
     renderWithProviders(<App />);
-    expect(screen.getByText(/Jobseeker/)).toBeDefined();
-    expect(screen.getByText(/Employer/)).toBeDefined();
+    expect(screen.getAllByText(/Jobseeker/)[0]).toBeDefined();
+    expect(screen.getAllByText(/Employer/)[0]).toBeDefined();
   });
 
   it('renders the hero section on home page', () => {
     renderWithProviders(<App />);
-    expect(screen.getByText(/Find Your Next Opportunity/)).toBeDefined();
+    expect(screen.getByText(/Connect with Verified Talent/)).toBeDefined();
   });
 });
 
@@ -41,35 +41,35 @@ describe('Protected Routes', () => {
     const store = createTestStore({
       auth: { user: null, token: null, isLoading: false, error: null }
     });
-    
+
     renderWithProviders(<App />, store);
-    
-    expect(screen.getByText(/Find Your Next Opportunity/)).toBeDefined();
+
+    expect(screen.getByText(/Connect with Verified Talent/)).toBeDefined();
   });
 });
 
 describe('Auth State', () => {
   it('renders app with auth state', () => {
     const store = createTestStore({
-      auth: { 
-        user: { id: 1, email: 'test@test.com', user_type: 'jobseeker' }, 
-        token: 'test-token-123', 
-        isLoading: false, 
-        error: null 
+      auth: {
+        user: { id: 1, email: 'test@test.com', user_type: 'jobseeker' },
+        token: 'test-token-123',
+        isLoading: false,
+        error: null
       }
     });
-    
+
     renderWithProviders(<App />, store);
-    expect(screen.getByText(/Jobseeker/)).toBeDefined();
+    expect(screen.getAllByText(/Jobseeker/)[0]).toBeDefined();
   });
 
   it('renders app for unauthenticated user', () => {
     const store = createTestStore({
       auth: { user: null, token: null, isLoading: false, error: null }
     });
-    
+
     renderWithProviders(<App />, store);
-    expect(screen.getByText(/Find Your Next Opportunity/)).toBeDefined();
+    expect(screen.getByText(/Connect with Verified Talent/)).toBeDefined();
   });
 });
 
@@ -79,9 +79,9 @@ describe('Responsive Design', () => {
       writable: true,
       value: 375,
     });
-    
+
     renderWithProviders(<App />);
-    
+
     const toggleButton = document.querySelector('.mobile-toggle');
     expect(toggleButton).toBeDefined();
   });
