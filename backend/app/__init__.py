@@ -17,7 +17,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    cors.init_app(app, origins=["https://kazilive-eta.vercel.app"])
+    cors.init_app(app, origins=["https://kazilive-eta.vercel.app", "http://localhost:5173"])
     
     # Initialize Cloudinary
     try:
