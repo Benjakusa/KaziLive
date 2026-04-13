@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Phone, MapPin, User, Briefcase, FileText, Upload, LogIn, Lock } from 'lucide-react';
+import { Mail, Phone, MapPin, User, Briefcase, FileText, Upload, LogIn, Lock, Camera } from 'lucide-react';
 import { register } from '../services/api';
 
 export default function JobseekerRegister() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [profilePreview, setProfilePreview] = useState(null);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -18,11 +19,26 @@ export default function JobseekerRegister() {
     expectedSalary: '',
     password: '',
     confirmPassword: '',
-    cv: null
+    cv: null,
+    profilePicture: null
   });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleProfilePictureChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size <= 2 * 1024 * 1024) {
+        setFormData({ ...formData, profilePicture: file });
+        const reader = new FileReader();
+        reader.onloadend = () => setProfilePreview(reader.result);
+        reader.readAsDataURL(file);
+      } else {
+        alert('Image too large. Max 2MB allowed.');
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -67,6 +83,51 @@ export default function JobseekerRegister() {
         <div className="card-body">
           {error && <div className="alert alert-error mb-4">{error}</div>}
           <form onSubmit={handleSubmit}>
+            <div className="form-group" style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <label className="form-label">Profile Picture</label>
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <div
+                  style={{
+                    width: '100px',
+                    height: '100px',
+                    borderRadius: '50%',
+                    background: profilePreview ? `url(${profilePreview}) center/cover` : '#e5e7eb',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto',
+                    border: '2px solid var(--primary)'
+                  }}
+                >
+                  {!profilePreview && <User size={40} color="#9ca3af" />}
+                </div>
+                <label
+                  htmlFor="profile-picture"
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    background: 'var(--primary)',
+                    borderRadius: '50%',
+                    padding: '8px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <Camera size={16} color="white" />
+                </label>
+                <input
+                  type="file"
+                  id="profile-picture"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleProfilePictureChange}
+                />
+              </div>
+              <p className="text-muted small" style={{ marginTop: '8px' }}>Optional - Max 2MB</p>
+            </div>
             <div className="form-group">
               <label className="form-label">
                 Full Name
@@ -250,10 +311,68 @@ export default function JobseekerRegister() {
               <label className="form-label">
                 Upload CV
               </label>
-              <div className="upload-dropzone">
-                <Upload size={32} />
-                <p>Drag and drop your CV here, or click to browse</p>
-                <p className="text-muted small">PDF, DOC, DOCX up to 5MB</p>
+              <input
+                type="file"
+                id="cv-upload"
+                name="cv"
+                accept=".pdf,.doc,.docx"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file && file.size <= 5 * 1024 * 1024) {
+                    setFormData({ ...formData, cv: file });
+                  } else if (file) {
+                    alert('File too large. Max 5MB allowed.');
+                  }
+                }}
+              />
+              <div
+                className={`upload-dropzone ${formData.cv ? 'has-file' : ''}`}
+                onClick={() => document.getElementById('cv-upload').click()}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.add('drag-active');
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove('drag-active');
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove('drag-active');
+                  const file = e.dataTransfer.files[0];
+                  if (file && file.size <= 5 * 1024 * 1024) {
+                    setFormData({ ...formData, cv: file });
+                  } else if (file) {
+                    alert('File too large. Max 5MB allowed.');
+                  }
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                {formData.cv ? (
+                  <>
+                    <FileText size={32} color="var(--primary)" />
+                    <p style={{ fontWeight: 600 }}>{formData.cv.name}</p>
+                    <p className="text-muted small">{(formData.cv.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ marginTop: '8px', padding: '4px 12px', fontSize: '0.8rem' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFormData({ ...formData, cv: null });
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Upload size={32} />
+                    <p>Drag and drop your CV here, or click to browse</p>
+                    <p className="text-muted small">PDF, DOC, DOCX up to 5MB</p>
+                  </>
+                )}
               </div>
             </div>
             <button type="submit" className="btn btn-primary btn-block" disabled={loading}>

@@ -8,10 +8,12 @@ import EmployerRegister from './pages/EmployerRegister.jsx';
 import EmployerSearch from './pages/EmployerSearch.jsx';
 import EmployerProfileView from './pages/EmployerProfileView.jsx';
 import EmployerContact from './pages/EmployerContact.jsx';
+import EmployerDashboard from './pages/employer/EmployerDashboard.jsx';
 
 import JobseekerLogin from './pages/JobseekerLogin.jsx';
 import JobseekerRegister from './pages/JobseekerRegister.jsx';
 import JobseekerProfile from './pages/JobseekerProfile.jsx';
+import JobseekerDashboard from './pages/jobseeker/JobseekerDashboard.jsx';
 
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import AdminLogin from './pages/admin/AdminLogin.jsx';
@@ -66,12 +68,14 @@ function App() {
             <Route path="/jobseeker/register" element={<JobseekerRegister />} />
             <Route path="/jobseeker/profile" element={<JobseekerProfile />} />
             <Route path="/jobseeker/profile/:id" element={<JobseekerProfile />} />
+            <Route path="/jobseeker/dashboard" element={<JobseekerDashboard />} />
 
             <Route path="/employer/login" element={<EmployerLogin />} />
             <Route path="/employer/register" element={<EmployerRegister />} />
             <Route path="/employer/search" element={<EmployerSearch />} />
             <Route path="/employer/profile/:id" element={<EmployerProfileView />} />
             <Route path="/employer/contact/:id" element={<EmployerContact />} />
+            <Route path="/employer/dashboard" element={<EmployerDashboard />} />
 
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />

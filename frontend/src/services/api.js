@@ -47,3 +47,21 @@ export const getJobseekers = async () => {
   const data = await response.json();
   return data;
 };
+
+export const uploadFile = async (file, fileType = 'cv') => {
+  const token = localStorage.getItem('token');
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('file_type', fileType);
+
+  const response = await fetch('/api/jobseeker/upload', {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.error || 'Upload failed');
+  }
+  return result;
+};

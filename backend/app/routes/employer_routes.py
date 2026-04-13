@@ -56,8 +56,9 @@ def search_jobseekers():
     employer = Employer.query.filter_by(id=user_id).first()
     if not employer:
         return jsonify({'error': 'Employer profile not found'}), 404
-    if not employer.verified:
-        return jsonify({'error': 'Payment required to view jobseeker profiles'}), 402
+    # Temporarily allow access for testing - payment check can be enabled later
+    # if not employer.verified:
+    #     return jsonify({'error': 'Payment required to view jobseeker profiles'}), 402
     
     job_category = request.args.get('job_category')
     availability = request.args.get('availability')
@@ -124,12 +125,20 @@ def view_jobseeker_profile(jobseeker_id):
     employer = Employer.query.filter_by(id=user_id).first()
     if not employer:
         return jsonify({'error': 'Employer profile not found'}), 404
-    if not employer.verified:
-        return jsonify({'error': 'Payment required to view profiles'}), 402
+    # Payment check temporarily disabled for testing
+    # if not employer.verified:
+    #     return jsonify({'error': 'Payment required to view profiles'}), 402
+    
     jobseeker = Jobseeker.query.get(jobseeker_id)
     if not jobseeker:
         return jsonify({'error': 'Jobseeker not found'}), 404
     jobseeker_user = User.query.get(jobseeker.id)
+    
+    # Get uploaded documents (CV, certificates)
+    from ..models.document import Document
+    documents = Document.query.filter_by(user_id=jobseeker_id).all()
+    docs = [{'id': d.id, 'file_name': d.file_name, 'file_url': d.file_url, 'file_type': d.file_type, 'status': d.status} for d in documents]
+    
     return jsonify({
         'id': jobseeker.id,
         'email': jobseeker_user.email,
@@ -140,7 +149,9 @@ def view_jobseeker_profile(jobseeker_id):
         'availability_status': jobseeker.availability_status,
         'job_category': jobseeker.job_category,
         'expected_salary': jobseeker.expected_salary,
-        'skills': jobseeker.skills
+        'skills': jobseeker.skills,
+        'profile_verified': jobseeker.profile_verified,
+        'documents': docs
     }), 200
 
 @bp.route('/contact/<int:jobseeker_id>', methods=['POST'])

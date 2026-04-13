@@ -310,6 +310,12 @@ body {
   background: var(--background);
 }
 
+.upload-dropzone.drag-active {
+  border-color: var(--primary);
+  background: rgba(128, 0, 0, 0.05);
+  box-shadow: 0 0 0 3px rgba(128, 0, 0, 0.1);
+}
+
 .upload-dropzone svg {
   color: var(--text-secondary);
   margin-bottom: 12px;

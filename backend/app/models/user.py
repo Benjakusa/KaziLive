@@ -53,6 +53,7 @@ class Jobseeker(User):
     bio = db.Column(db.Text)
     location = db.Column(db.String(100))
     skills = db.Column(db.JSON, default=list)
+    profile_picture = db.Column(db.String(500))
     
     contacts = db.relationship('Contact', foreign_keys='Contact.jobseeker_id', backref='jobseeker', lazy=True)
 
@@ -67,6 +68,7 @@ class Employer(User):
     company_name = db.Column(db.String(100))
     company_description = db.Column(db.Text)
     company_location = db.Column(db.String(100))
+    company_logo = db.Column(db.String(500))
     verified = db.Column(db.Boolean, default=False)
     verified_at = db.Column(db.DateTime, nullable=True)
     

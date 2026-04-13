@@ -40,10 +40,11 @@ def upload_file():
     # Save to database
     document = Document(
         user_id=user_id,
-        document_url=result['url'],
-        document_type=file_type,
-        filename=file.filename,
-        is_approved=False
+        file_name=file.filename,
+        file_url=result['url'],
+        file_type=file_type,
+        file_size=request.content_length,
+        status='pending'
     )
     db.session.add(document)
     db.session.commit()
@@ -52,10 +53,10 @@ def upload_file():
         'message': 'File uploaded successfully',
         'file': {
             'id': document.id,
-            'url': result['url'],
-            'type': file_type,
-            'filename': file.filename,
-            'is_approved': False
+            'url': document.file_url,
+            'type': document.file_type,
+            'filename': document.file_name,
+            'status': document.status
         }
     }), 201
 

@@ -44,6 +44,13 @@ def register():
             user_type=user_type,
             is_active=True,
             is_verified=True,
+            full_name=data.get('full_name'),
+            location=data.get('location'),
+            job_category=data.get('job_category'),
+            skills=data.get('skills', '').split(',') if data.get('skills') else [],
+            expected_salary=data.get('expected_salary'),
+            bio=data.get('bio'),
+            availability_status=data.get('availability_status', 'available'),
         )
     elif user_type == UserType.EMPLOYER:
         user = Employer(
@@ -55,6 +62,8 @@ def register():
             is_active=True,
             is_verified=True,
             company_name=data.get('company_name', ''),
+            company_location=data.get('location', ''),
+            company_description=data.get('company_description', ''),
         )
     elif user_type == UserType.ADMIN:
         user = Admin(
