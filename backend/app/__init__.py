@@ -26,7 +26,7 @@ def create_app(config_class=Config):
     except ImportError:
         pass
 
-    from .models import user, document, payment, contact, promotion
+    from .models import user, document, payment, contact, promotion, notification
 
     from .routes.main_routes import bp as main_bp
     from .routes.auth_routes import bp as auth_bp
@@ -41,6 +41,12 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_bp)
     app.register_blueprint(jobseeker_bp)
     app.register_blueprint(employer_bp)
+    
+    try:
+        from .routes.notification_routes import bp as notification_bp
+        app.register_blueprint(notification_bp)
+    except ImportError:
+        pass
     
     # Register payment routes (optional)
     try:

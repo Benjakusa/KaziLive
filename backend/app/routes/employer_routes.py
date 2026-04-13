@@ -56,9 +56,8 @@ def search_jobseekers():
     employer = Employer.query.filter_by(id=user_id).first()
     if not employer:
         return jsonify({'error': 'Employer profile not found'}), 404
-    # Temporarily allow access for testing - payment check can be enabled later
-    # if not employer.verified:
-    #     return jsonify({'error': 'Payment required to view jobseeker profiles'}), 402
+    if not employer.verified:
+        return jsonify({'error': 'Payment required to view jobseeker profiles. Please complete payment to get verified.'}), 402
     
     job_category = request.args.get('job_category')
     availability = request.args.get('availability')
@@ -125,9 +124,8 @@ def view_jobseeker_profile(jobseeker_id):
     employer = Employer.query.filter_by(id=user_id).first()
     if not employer:
         return jsonify({'error': 'Employer profile not found'}), 404
-    # Payment check temporarily disabled for testing
-    # if not employer.verified:
-    #     return jsonify({'error': 'Payment required to view profiles'}), 402
+    if not employer.verified:
+        return jsonify({'error': 'Payment required to view profiles. Please complete payment to get verified.'}), 402
     
     jobseeker = Jobseeker.query.get(jobseeker_id)
     if not jobseeker:
@@ -187,3 +185,26 @@ def contact_jobseeker(jobseeker_id):
         'message': 'Message sent successfully',
         'contact_id': contact.id
     }), 200
+
+
+@bp.route('/contacts', methods=['GET'])
+@jwt_required()
+def get_employer_contacts():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if user.user_type.value.lower() != 'employer':
+        return jsonify({'error': 'Only employers can access contacts'}), 403
+    employer = Employer.query.filter_by(id=user_id).first()
+    if not employer:
+        return jsonify({'error': 'Employer profile not found'}), 404
+    
+    contacts = Contact.query.filter_by(employer_id=employer.id).order_by(Contact.created_at.desc()).all()
+    return jsonify([{
+        'id': c.id,
+        'jobseeker_id': c.jobseeker_id,
+        'jobseeker_name': Jobseeker.query.get(c.jobseeker_id).full_name if Jobseeker.query.get(c.jobseeker_id) else None,
+        'message': c.message,
+        'contact_method': c.contact_method,
+        'status': c.status,
+        'created_at': c.created_at.isoformat()
+    } for c in contacts]), 200

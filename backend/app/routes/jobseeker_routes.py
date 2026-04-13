@@ -1,8 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from .. import db
-from ..models.user import Jobseeker
+from ..models.user import Jobseeker, Employer
 from ..models.document import Document
+from ..models.contact import Contact
 from ..services.cloudinary_service import upload_image, upload_document
 
 bp = Blueprint('jobseeker', __name__, url_prefix='/api/jobseeker')
@@ -122,3 +123,23 @@ def get_profile():
         'skills': jobseeker.skills or [],
         'profile_verified': jobseeker.profile_verified
     }), 200
+
+
+@bp.route('/contacts', methods=['GET'])
+@jwt_required()
+def get_jobseeker_contacts():
+    user_id = get_jwt_identity()
+    jobseeker = Jobseeker.query.get(user_id)
+    if not jobseeker:
+        return jsonify({'error': 'Jobseeker profile not found'}), 404
+    
+    contacts = Contact.query.filter_by(jobseeker_id=user_id).order_by(Contact.created_at.desc()).all()
+    return jsonify([{
+        'id': c.id,
+        'employer_id': c.employer_id,
+        'employer_name': Employer.query.get(c.employer_id).company_name if Employer.query.get(c.employer_id) else None,
+        'message': c.message,
+        'contact_method': c.contact_method,
+        'status': c.status,
+        'created_at': c.created_at.isoformat()
+    } for c in contacts]), 200

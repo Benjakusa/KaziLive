@@ -79,3 +79,52 @@ def activate_user(user_id):
     db.session.commit()
 
     return jsonify({'message': f'User {user.username} activated'}), 200
+
+
+@bp.route('/jobseekers/<int:user_id>/verify', methods=['PUT'])
+@admin_required
+def verify_jobseeker(user_id):
+    jobseeker = Jobseeker.query.get(user_id)
+    if not jobseeker:
+        return jsonify({'error': 'Jobseeker not found'}), 404
+    jobseeker.profile_verified = True
+    db.session.commit()
+    return jsonify({'message': 'Jobseeker profile verified successfully'}), 200
+
+
+@bp.route('/jobseekers/<int:user_id>/unverify', methods=['PUT'])
+@admin_required
+def unverify_jobseeker(user_id):
+    jobseeker = Jobseeker.query.get(user_id)
+    if not jobseeker:
+        return jsonify({'error': 'Jobseeker not found'}), 404
+    jobseeker.profile_verified = False
+    db.session.commit()
+    return jsonify({'message': 'Jobseeker profile verification revoked'}), 200
+
+
+@bp.route('/jobseekers', methods=['GET'])
+@admin_required
+def list_jobseekers():
+    jobseekers = Jobseeker.query.all()
+    return jsonify([{
+        'id': js.id,
+        'full_name': js.full_name,
+        'job_category': js.job_category,
+        'availability_status': js.availability_status,
+        'expected_salary': js.expected_salary,
+        'location': js.location,
+        'profile_verified': js.profile_verified,
+    } for js in jobseekers]), 200
+
+
+@bp.route('/documents/<int:doc_id>/reject', methods=['PUT'])
+@admin_required
+def reject_document(doc_id):
+    document = Document.query.get(doc_id)
+    if not document:
+        return jsonify({'error': 'Document not found'}), 404
+    document.is_approved = False
+    document.status = 'rejected'
+    db.session.commit()
+    return jsonify({'message': 'Document rejected'}), 200
