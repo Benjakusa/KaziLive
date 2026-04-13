@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, Lock, Building, Phone, MapPin, LogIn } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, Building, Phone, MapPin, LogIn, User } from 'lucide-react';
+import { register } from '../services/api';
 
 export default function EmployerRegister() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     companyName: '',
+    username: '',
     email: '',
     phone: '',
     location: '',
@@ -16,13 +21,33 @@ export default function EmployerRegister() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
-    console.log('Employer registration:', formData);
+
+    setLoading(true);
+    try {
+      await register({
+        email: formData.email,
+        username: formData.username || formData.email.split('@')[0],
+        phone: formData.phone,
+        password: formData.password,
+        user_type: 'employer',
+        company_name: formData.companyName,
+        location: formData.location
+      });
+      alert('Registration successful! Please login.');
+      navigate('/employer/login');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -33,6 +58,7 @@ export default function EmployerRegister() {
           <h2>Employer Registration</h2>
         </div>
         <div className="card-body">
+          {error && <div className="alert alert-error mb-4">{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label">
@@ -46,6 +72,23 @@ export default function EmployerRegister() {
                   className="form-input"
                   placeholder="Your Company Ltd"
                   value={formData.companyName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">
+                Username
+              </label>
+              <div className="input-icon-wrapper">
+                <User size={18} />
+                <input
+                  type="text"
+                  name="username"
+                  className="form-input"
+                  placeholder="companyuser"
+                  value={formData.username}
                   onChange={handleChange}
                   required
                 />
@@ -136,8 +179,8 @@ export default function EmployerRegister() {
                 />
               </div>
             </div>
-            <button type="submit" className="btn btn-primary btn-block">
-              Register Company
+            <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+              {loading ? 'Registering...' : 'Register Company'}
             </button>
             <p className="text-center mt-4 text-muted">
               Already have an account? <Link to="/employer/login" style={{ color: 'var(--primary)' }}>Sign in</Link>

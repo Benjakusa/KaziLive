@@ -1,34 +1,49 @@
-export async function login(userType, credentials) {
-  const response = await fetch(`/api/${userType}/login`, {
+const API_BASE_URL = '/api/auth';
+
+export async function register(userData) {
+  const response = await fetch(`${API_BASE_URL}/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(userData),
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Registration failed');
+  }
+  return data;
+}
+
+export async function login(credentials) {
+  const response = await fetch(`${API_BASE_URL}/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(credentials),
   });
-  return response.json();
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Login failed');
+  }
+  return data;
 }
 
-/**
- * MOCK FUNCTIONS
- * These should be replaced by real API endpoints in production.
- */
-
-export const updateProfile = async (data) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log("Saved:", data);
-      resolve({ message: "Profile updated" });
-    }, 1000);
+export const updateProfile = async (userType, data, token) => {
+  const response = await fetch(`/api/${userType}/profile`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(data),
   });
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.error || 'Profile update failed');
+  }
+  return result;
 };
 
 export const getJobseekers = async () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        { id: 1, name: "John Doe", jobCategory: "Frontend Developer", salary: "500 USD" },
-        { id: 2, name: "Jane Smith", jobCategory: "Backend Developer", salary: "700 USD" },
-        { id: 3, name: "Mike Johnson", jobCategory: "UI/UX Designer", salary: "600 USD" },
-      ]);
-    }, 1000);
-  });
+  const response = await fetch('/api/employer/jobseekers');
+  const data = await response.json();
+  return data;
 };

@@ -1,16 +1,23 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, User, Briefcase, FileText, Upload, LogIn } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Phone, MapPin, User, Briefcase, FileText, Upload, LogIn, Lock } from 'lucide-react';
+import { register } from '../services/api';
 
 export default function JobseekerRegister() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    username: '',
     phone: '',
     location: '',
     jobCategory: '',
     skills: '',
     expectedSalary: '',
+    password: '',
+    confirmPassword: '',
     cv: null
   });
 
@@ -18,9 +25,36 @@ export default function JobseekerRegister() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Jobseeker registration:', formData);
+    setError('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await register({
+        email: formData.email,
+        username: formData.username || formData.email.split('@')[0],
+        phone: formData.phone,
+        password: formData.password,
+        user_type: 'jobseeker',
+        full_name: formData.fullName,
+        location: formData.location,
+        job_category: formData.jobCategory,
+        skills: formData.skills,
+        expected_salary: formData.expectedSalary
+      });
+      alert('Registration successful! Please login.');
+      navigate('/jobseeker/login');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -31,6 +65,7 @@ export default function JobseekerRegister() {
           <h2>Jobseeker Registration</h2>
         </div>
         <div className="card-body">
+          {error && <div className="alert alert-error mb-4">{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label">
@@ -61,6 +96,23 @@ export default function JobseekerRegister() {
                   className="form-input"
                   placeholder="john@email.co.ke"
                   value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">
+                Username
+              </label>
+              <div className="input-icon-wrapper">
+                <User size={18} />
+                <input
+                  type="text"
+                  name="username"
+                  className="form-input"
+                  placeholder="johndoe"
+                  value={formData.username}
                   onChange={handleChange}
                   required
                 />
@@ -100,6 +152,41 @@ export default function JobseekerRegister() {
                 />
               </div>
             </div>
+            <div className="form-group">
+              <label className="form-label">
+                Password
+              </label>
+              <div className="input-icon-wrapper">
+                <Lock size={18} />
+                <input
+                  type="password"
+                  name="password"
+                  className="form-input"
+                  placeholder="Create a password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">
+                Confirm Password
+              </label>
+              <div className="input-icon-wrapper">
+                <Lock size={18} />
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  className="form-input"
+                  placeholder="Confirm your password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
             <div className="form-group">
               <label className="form-label">
                 Job Category
@@ -169,8 +256,8 @@ export default function JobseekerRegister() {
                 <p className="text-muted small">PDF, DOC, DOCX up to 5MB</p>
               </div>
             </div>
-            <button type="submit" className="btn btn-primary btn-block">
-              Create Profile
+            <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+              {loading ? 'Creating Profile...' : 'Create Profile'}
             </button>
             <p className="text-center mt-4 text-muted">
               Already have an account? <Link to="/jobseeker/login" style={{ color: 'var(--primary)' }}>Sign in</Link>
