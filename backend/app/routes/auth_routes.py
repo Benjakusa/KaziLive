@@ -42,9 +42,8 @@ def register():
             phone=data['phone'],
             password_hash=password_hash,
             user_type=user_type,
-            is_active=False,
-            two_factor_token=token,
-            two_factor_expires=token_expiry,
+            is_active=True,
+            is_verified=True,
         )
     elif user_type == UserType.EMPLOYER:
         user = Employer(
@@ -53,9 +52,8 @@ def register():
             phone=data['phone'],
             password_hash=password_hash,
             user_type=user_type,
-            is_active=False,
-            two_factor_token=token,
-            two_factor_expires=token_expiry,
+            is_active=True,
+            is_verified=True,
             company_name=data.get('company_name', ''),
         )
     elif user_type == UserType.ADMIN:
@@ -65,9 +63,8 @@ def register():
             phone=data['phone'],
             password_hash=password_hash,
             user_type=user_type,
-            is_active=False,
-            two_factor_token=token,
-            two_factor_expires=token_expiry,
+            is_active=True,
+            is_verified=True,
         )
 
     db.session.add(user)
