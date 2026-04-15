@@ -154,13 +154,19 @@ def login():
     if not identifier or not password:
         return jsonify({'error': 'identifier and password are required'}), 400
 
+    print(f"LOGIN ATTEMPT: {identifier}")
     user = (
         User.query.filter_by(email=identifier).first() or
         User.query.filter_by(username=identifier).first() or
         User.query.filter_by(phone=identifier).first()
     )
 
-    if not user or not check_password_hash(user.password_hash, password):
+    if not user:
+        print(f"LOGIN FAILED: User not found for {identifier}")
+        return jsonify({'error': 'Invalid credentials'}), 401
+    
+    if not check_password_hash(user.password_hash, password):
+        print(f"LOGIN FAILED: Password mismatch for {identifier}")
         return jsonify({'error': 'Invalid credentials'}), 401
 
     # Bypassing is_active check to allow access without email verification

@@ -1,5 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/auth';
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ? import.meta.env.VITE_API_BASE_URL.replace('/auth', '') : '/api';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://kazilive-backend.onrender.com';
+const API_BASE_URL = `${BACKEND_URL}/api/auth`;
+const BASE_URL = `${BACKEND_URL}/api`;
 
 export async function register(userData) {
   const response = await fetch(`${API_BASE_URL}/register`, {
