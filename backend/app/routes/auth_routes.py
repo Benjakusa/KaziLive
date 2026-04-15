@@ -32,8 +32,9 @@ def register():
 
     password_hash = generate_password_hash(data['password'])
 
-    token = generate_verification_token()
-    token_expiry = get_token_expiry()
+    # Bypass verification token generation
+    token = "000000" # Dummy token
+    token_expiry = datetime.utcnow()
 
     if user_type == UserType.JOBSEEKER:
         user = Jobseeker(
@@ -80,11 +81,13 @@ def register():
 
     db.session.add(user)
     db.session.commit()
+    print(f"DEBUG: Saved user {user.username} with is_active={user.is_active}, is_verified={user.is_verified}")
 
-    send_verification_email(user.email, token)
+    # Explicitly NOT sending verification email as per user request
+    # send_verification_email(user.email, token)
 
     return jsonify({
-        'message': 'Registration successful. Check your email for the verification token.',
+        'message': 'Registration successful. You can now login.',
         'user': {
             'id': user.id,
             'email': user.email,
@@ -160,11 +163,12 @@ def login():
     if not user or not check_password_hash(user.password_hash, password):
         return jsonify({'error': 'Invalid credentials'}), 401
 
-    if not user.is_active:
-        print(f"LOGIN FAILED: Account not verified for {identifier}")
-        return jsonify({'error': 'Account not verified. Check your email for the verification token.'}), 403
-
-    print(f"LOGIN SUCCESS: {identifier}")
+    # Bypassing is_active check to allow access without email verification
+    print(f"DEBUG: User status for {identifier}: is_active={user.is_active} (Bypassing check)")
+    
+    print(f"LOGIN SUCCESS for {identifier}")
+    user.is_active = True # Force active status just in case
+    db.session.commit()
 
     access_token = create_access_token(
         identity=str(user.id),
