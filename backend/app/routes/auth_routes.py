@@ -6,7 +6,7 @@ from .. import db
 from ..models.user import User, Jobseeker, Employer, Admin, UserType
 from ..utils.email import generate_verification_token, get_token_expiry, send_verification_email
 
-bp = Blueprint('auth', __name__, url_prefix='/api/auth', strict_slashes=False)
+bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 
 @bp.route('/register', methods=['POST'])
