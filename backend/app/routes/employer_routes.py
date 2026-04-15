@@ -6,7 +6,7 @@ from ..models.contact import Contact
 from ..models.document import Document
 from ..services.cloudinary_service import upload_image, upload_document
 
-bp = Blueprint('employer', __name__, url_prefix='/api/employer')
+bp = Blueprint('employer', __name__, url_prefix='/api/employer', strict_slashes=False)
 
 @bp.route('/upload', methods=['POST'])
 @jwt_required()

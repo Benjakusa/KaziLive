@@ -6,7 +6,7 @@ from .. import db
 from ..models.user import User, Jobseeker, Employer, Admin, UserType
 from ..utils.email import generate_verification_token, get_token_expiry, send_verification_email
 
-bp = Blueprint('auth', __name__, url_prefix='/api/auth')
+bp = Blueprint('auth', __name__, url_prefix='/api/auth', strict_slashes=False)
 
 
 @bp.route('/register', methods=['POST'])
@@ -161,7 +161,10 @@ def login():
         return jsonify({'error': 'Invalid credentials'}), 401
 
     if not user.is_active:
+        print(f"LOGIN FAILED: Account not verified for {identifier}")
         return jsonify({'error': 'Account not verified. Check your email for the verification token.'}), 403
+
+    print(f"LOGIN SUCCESS: {identifier}")
 
     access_token = create_access_token(
         identity=str(user.id),
