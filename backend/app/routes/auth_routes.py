@@ -44,13 +44,14 @@ def register():
             user_type=user_type,
             is_active=True,
             is_verified=True,
-            full_name=data.get('full_name'),
+            full_name=data.get('full_name') or data.get('fullName'),
             location=data.get('location'),
-            job_category=data.get('job_category'),
-            skills=data.get('skills', '').split(',') if data.get('skills') else [],
-            expected_salary=data.get('expected_salary'),
+            job_category=data.get('job_category') or data.get('jobCategory'),
+            skills=data.get('skills', '').split(',') if data.get('skills') and isinstance(data.get('skills'), str) else data.get('skills', []),
+            expected_salary=int(str(data.get('expected_salary') or '0').replace(',', '').replace('KSh', '').strip()) if data.get('expected_salary') else 0,
             bio=data.get('bio'),
             availability_status=data.get('availability_status', 'available'),
+            profile_picture=data.get('profile_picture') or data.get('profilePicture')
         )
     elif user_type == UserType.EMPLOYER:
         user = Employer(
@@ -61,9 +62,10 @@ def register():
             user_type=user_type,
             is_active=True,
             is_verified=True,
-            company_name=data.get('company_name', ''),
-            company_location=data.get('location', ''),
-            company_description=data.get('company_description', ''),
+            company_name=data.get('company_name') or data.get('companyName', ''),
+            company_location=data.get('location') or data.get('companyLocation', ''),
+            company_description=data.get('company_description') or data.get('companyDescription', ''),
+            company_logo=data.get('company_logo') or data.get('companyLogo')
         )
     elif user_type == UserType.ADMIN:
         user = Admin(

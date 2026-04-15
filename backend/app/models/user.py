@@ -47,6 +47,7 @@ class Jobseeker(User):
     availability_status = db.Column(db.String(50), default='available')
     job_category = db.Column(db.String(100))
     expected_salary = db.Column(db.Integer)
+    years_of_experience = db.Column(db.Integer, default=0)
     profile_verified = db.Column(db.Boolean, default=False)
     
     full_name = db.Column(db.String(100))

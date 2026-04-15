@@ -33,7 +33,7 @@ function AdminLogin() {
         throw new Error('Access denied. Admin only.');
       }
 
-      dispatch(loginSuccess(data));
+      dispatch(loginSuccess({ user: data.user, token: data.access_token }));
       navigate('/admin/dashboard');
     } catch (err) {
       setError(err.message);

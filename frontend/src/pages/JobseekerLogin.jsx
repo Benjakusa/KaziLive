@@ -1,16 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import { Mail, Lock, LogIn, User } from 'lucide-react';
 import { login } from '../services/api';
+import { loginSuccess } from '../features/auth/authSlice';
+
+
 
 export default function JobseekerLogin() {
   const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     identifier: '',
     password: ''
   });
+
+  useEffect(() => {
+    if (user && user.role === 'jobseeker') {
+      navigate('/jobseeker/dashboard');
+    } else if (user && user.role === 'employer') {
+      navigate('/employer/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,16 +37,27 @@ export default function JobseekerLogin() {
 
     try {
       const data = await login(formData);
-      localStorage.setItem('token', data.access_token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      alert('Login successful!');
-      navigate('/jobseeker/dashboard'); // Assuming this exists
+
+      // Enforce role: check user_type from backend
+      if (data.user?.user_type !== 'jobseeker') {
+        setError('This account is not a jobseeker account. Please use the correct login page.');
+        setLoading(false);
+        return;
+      }
+
+      dispatch(loginSuccess({
+        user: data.user,
+        token: data.access_token
+      }));
+      // alert('Login successful!'); // Optional: user might find it annoying
+      navigate('/jobseeker/dashboard');
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="grid-2">

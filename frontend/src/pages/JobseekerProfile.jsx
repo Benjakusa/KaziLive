@@ -32,6 +32,7 @@ export default function JobseekerProfile() {
     location: '',
     skills: '',
     expectedSalary: '',
+    yearsOfExperience: '',
     bio: '',
     jobCategory: ''
   });
@@ -60,6 +61,7 @@ export default function JobseekerProfile() {
           location: data.location || '',
           skills: data.skills ? data.skills.join(', ') : '',
           expectedSalary: data.expected_salary || '',
+          yearsOfExperience: data.years_of_experience || '',
           bio: data.bio || '',
           jobCategory: data.job_category || ''
         });
@@ -183,6 +185,7 @@ export default function JobseekerProfile() {
         job_category: formData.jobCategory,
         skills: skills,
         expected_salary: formData.expectedSalary ? parseInt(formData.expectedSalary) : null,
+        years_of_experience: formData.yearsOfExperience ? parseInt(formData.yearsOfExperience) : 0,
         bio: formData.bio
       }, token);
       setSaveSuccess(true);
@@ -356,6 +359,21 @@ export default function JobseekerProfile() {
                 className="form-input" 
                 placeholder="120,000" 
                 value={formData.expectedSalary}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Years of Experience</label>
+            <div className="input-icon-wrapper">
+              <Briefcase size={18} />
+              <input 
+                type="number" 
+                name="yearsOfExperience"
+                className="form-input" 
+                placeholder="2" 
+                min="0"
+                value={formData.yearsOfExperience}
                 onChange={handleChange}
               />
             </div>

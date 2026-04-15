@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { User, Briefcase, Mail, Phone, MapPin, Building, FileText, Download, ArrowLeft, CheckCircle, Clock } from 'lucide-react';
+import defaultAvatar from '../assets/default-avatar.png';
 
 export default function EmployerProfileView() {
   const { id } = useParams();
@@ -24,10 +25,12 @@ export default function EmployerProfileView() {
       const response = await fetch(`/api/employer/jobseekers/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setProfile(data);
+      } else if (response.status === 402) {
+        setError('Payment required to view candidate details. Please complete payment to get verified.');
       } else if (response.status === 401) {
         localStorage.removeItem('token');
         navigate('/employer/login');
@@ -82,26 +85,27 @@ export default function EmployerProfileView() {
         <div className="card">
           <div className="card-body">
             <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-              <div 
-                className="avatar" 
-                style={{ 
-                  width: '120px', 
-                  height: '120px', 
-                  fontSize: '3rem', 
+              <div
+                className="avatar"
+                style={{
+                  width: '120px',
+                  height: '120px',
                   margin: '0 auto 16px',
-                  background: 'var(--primary)',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '50%'
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  border: '3px solid var(--primary)'
                 }}
               >
-                {(profile.full_name || 'U').split(' ').map(n => n[0]).join('')}
+                <img
+                  src={profile.profile_picture || defaultAvatar}
+                  alt={profile.full_name}
+                  className="avatar-img"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
               </div>
               <h2 style={{ marginBottom: '8px' }}>{profile.full_name || 'No name set'}</h2>
               <p className="text-muted" style={{ marginBottom: '12px' }}>{profile.job_category || 'No category'}</p>
-              
+
               {profile.profile_verified ? (
                 <span style={{ color: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                   <CheckCircle size={16} /> Verified Profile
@@ -255,12 +259,14 @@ export default function EmployerProfileView() {
             </div>
           )}
 
-          <button 
-            className="btn btn-primary btn-block"
-            onClick={() => navigate(`/employer/contact/${id}`)}
+          <a
+            href={`tel:${profile.phone}`}
+            className="btn btn-primary btn-block text-center"
+            style={{ display: 'block' }}
           >
-            Contact Jobseeker
-          </button>
+            <Phone size={18} style={{ marginRight: '8px' }} />
+            Call Jobseeker
+          </a>
         </div>
       </div>
     </div>

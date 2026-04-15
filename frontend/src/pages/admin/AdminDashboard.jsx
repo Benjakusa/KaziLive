@@ -1,243 +1,185 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { Shield, Users, FileText, BarChart3, Settings, LogOut, Check, X, Eye } from 'lucide-react';
-import { loginSuccess } from '../../features/auth/authSlice';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../features/auth/authSlice';
+import DashboardLayout from '../../components/layout/DashboardLayout';
+import {
+  LayoutDashboard,
+  Users,
+  CheckSquare,
+  CreditCard,
+  BarChart3,
+  LogOut,
+  AlertTriangle,
+} from 'lucide-react';
+import StatCard from '../../components/shared/StatCard';
+import DataTable from '../../components/shared/DataTable';
+import Badge from '../../components/shared/Badge';
+import Chart from '../../components/shared/Chart';
+import AdminUsersView from '../../components/dashboard/AdminUsersView';
+import AdminVerificationsView from '../../components/dashboard/AdminVerificationsView';
+import AdminReportsView from '../../components/dashboard/AdminReportsView';
+import AdminPaymentsView from '../../components/dashboard/AdminPaymentsView';
 
-function AdminDashboard() {
+
+const AdminDashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [users, setUsers] = useState([]);
-  const [documents, setDocuments] = useState([]);
-  const [stats, setStats] = useState({ totalUsers: 0, jobseekers: 0, employers: 0, pendingDocs: 0 });
-
-  useEffect(() => {
-    if (!user || user.user_type !== 'admin') {
-      navigate('/admin/login');
-    }
-  }, [user, navigate]);
-
-  const fetchData = async () => {
-    const token = localStorage.getItem('token');
-    try {
-      const usersRes = await fetch('/api/admin/users', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const usersData = await usersRes.json();
-      setUsers(usersData);
-
-      const docsRes = await fetch('/api/admin/documents', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const docsData = await docsRes.json();
-      setDocuments(docsData.filter(d => !d.is_approved));
-
-      setStats({
-        totalUsers: usersData.length,
-        jobseekers: usersData.filter(u => u.user_type === 'jobseeker').length,
-        employers: usersData.filter(u => u.user_type === 'employer').length,
-        pendingDocs: docsData.filter(d => !d.is_approved).length
-      });
-    } catch (error) {
-      console.error('Failed to fetch admin data:', error);
-    }
-  };
-
-  useEffect(() => {
-    if (user?.user_type === 'admin') fetchData();
-  }, [user]);
-
-  const handleApproveDocument = async (docId) => {
-    const token = localStorage.getItem('token');
-    try {
-      const res = await fetch(`/api/admin/documents/${docId}/approve`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        setDocuments(documents.filter(d => d.id !== docId));
-        setStats({ ...stats, pendingDocs: stats.pendingDocs - 1 });
-      }
-    } catch (error) {
-      console.error('Failed to approve document:', error);
-    }
-  };
-
-  const handleDeactivateUser = async (userId) => {
-    const token = localStorage.getItem('token');
-    try {
-      const res = await fetch(`/api/admin/users/${userId}/deactivate`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        setUsers(users.map(u => u.id === userId ? { ...u, is_active: false } : u));
-      }
-    } catch (error) {
-      console.error('Failed to deactivate user:', error);
-    }
-  };
+  const [activeTab, setActiveTab] = useState('Overview');
 
   const handleLogout = () => {
-    dispatch(loginSuccess({ user: null, token: null }));
-    navigate('/');
+    dispatch(logout());
+    navigate('/admin/login');
   };
 
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: BarChart3 },
-    { id: 'users', label: 'Users', icon: Users },
-    { id: 'documents', label: 'Documents', icon: FileText },
-    { id: 'settings', label: 'Settings', icon: Settings },
+  const menuItems = [
+    { label: 'Overview', icon: LayoutDashboard, path: '#', id: 'Overview', onClick: () => setActiveTab('Overview') },
+    { label: 'User Management', icon: Users, path: '#', id: 'Users', onClick: () => setActiveTab('Users') },
+    { label: 'Verification Requests', icon: CheckSquare, path: '#', id: 'Verifications', onClick: () => setActiveTab('Verifications') },
+    { label: 'Payment Management', icon: CreditCard, path: '#', id: 'Payments', onClick: () => setActiveTab('Payments') },
+    { label: 'Reports & Analytics', icon: BarChart3, path: '#', id: 'Reports', onClick: () => setActiveTab('Reports') },
+    { label: 'Logout', icon: LogOut, path: '#', id: 'Logout', onClick: handleLogout },
   ];
 
-  return (
-    <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <div className="admin-sidebar-header">
-          <Shield size={24} style={{ color: 'var(--primary)' }} />
-          <span>Admin Portal</span>
+
+  const [stats, setStats] = useState(null);
+  const [verifications, setVerifications] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+
+      const [statsRes, verifRes] = await Promise.all([
+        fetch('/api/admin/stats', { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch('/api/admin/documents', { headers: { 'Authorization': `Bearer ${token}` } })
+      ]);
+
+      if (statsRes.status === 401 || verifRes.status === 401) {
+        localStorage.clear();
+        navigate('/admin/login');
+        return;
+      }
+
+      if (statsRes.ok) setStats(await statsRes.json());
+      if (verifRes.ok) {
+        const docs = await verifRes.json();
+        setVerifications(docs.filter(d => d.status === 'Under Review').slice(0, 5));
+      }
+    } catch (err) {
+      console.error('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const renderOverview = () => (
+    <div className="dashboard-grid">
+      <div className="stats-row">
+        <StatCard title="Total Users" value={stats?.total_users || '0'} icon={Users} trend="up" trendValue="--" />
+        <StatCard title="Pending Verifications" value={stats?.pending_verifications || '0'} icon={CheckSquare} color="maroon" />
+        <StatCard title="Total Revenue" value={`KSh ${stats?.total_revenue?.toLocaleString() || '0'}`} icon={CreditCard} trend="up" trendValue="--" />
+        <StatCard title="Active Issues" value="0" icon={AlertTriangle} color="yellow" />
+      </div>
+
+      <div className="dashboard-main-grid">
+        <div className="dashboard-left-col">
+          <div className="card">
+            <div className="card-header-flex">
+              <h3>Engagement Summary</h3>
+              <Badge variant="success">Platform status: {stats?.server_status || 'Checking...'}</Badge>
+            </div>
+            <div className="mt-4">
+              <Chart
+                data={[
+                  { name: 'Jobseekers', count: stats?.jobseekers || 0 },
+                  { name: 'Employers', count: stats?.employers || 0 },
+                  { name: 'Documents', count: stats?.total_documents || 0 }
+                ]}
+                xKey="name"
+                yKey="count"
+                color="#800020"
+              />
+            </div>
+          </div>
+
+          <div className="card mt-6">
+            <div className="card-header-flex">
+              <h3>Verification Queue</h3>
+              <Badge variant="yellow">{stats?.pending_verifications || 0} Pending</Badge>
+            </div>
+            <DataTable
+              columns={[
+                { header: 'User', accessor: 'user_name' },
+                {
+                  header: 'Type',
+                  accessor: 'user_type',
+                  render: (type) => <Badge variant={type === 'jobseeker' ? 'maroon' : 'black'}>{type}</Badge>
+                },
+                { header: 'Date', accessor: 'uploaded_at' },
+                {
+                  header: 'Actions',
+                  accessor: 'id',
+                  render: (id) => (
+                    <button className="btn-text-maroon" onClick={() => setActiveTab('Verifications')}>Review</button>
+                  )
+                }
+              ]}
+              data={verifications}
+              title="Recent Requests"
+            />
+          </div>
         </div>
-        <nav className="admin-nav">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              className={`admin-nav-item ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <tab.icon size={18} />
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-        <button className="admin-nav-item" onClick={handleLogout} style={{ marginTop: 'auto', borderTop: '1px solid var(--border)' }}>
-          <LogOut size={18} />
-          Logout
-        </button>
-      </aside>
 
-      <main className="admin-main">
-        {activeTab === 'overview' && (
-          <div className="admin-overview">
-            <h2>Dashboard Overview</h2>
-            <div className="stats-grid">
-              <div className="stat-card">
-                <Users size={32} />
-                <div className="stat-info">
-                  <h3>{stats.totalUsers}</h3>
-                  <p>Total Users</p>
+        <div className="dashboard-right-col">
+          <div className="card health-card">
+            <h3>Platform Health</h3>
+            <div className="health-metrics mt-4">
+              <div className="metric-item">
+                <div className="metric-header">
+                  <span>Server Status</span>
+                  <span className="text-success">{stats ? stats.server_status : 'Offline'}</span>
                 </div>
+                <div className="mini-progress"><div className="fill bg-success" style={{ width: stats ? '98%' : '0%' }}></div></div>
               </div>
-              <div className="stat-card">
-                <div className="stat-info">
-                  <h3>{stats.jobseekers}</h3>
-                  <p>Jobseekers</p>
+              <div className="metric-item mt-4">
+                <div className="metric-header">
+                  <span>Database Connectivity</span>
+                  <span>OK</span>
                 </div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-info">
-                  <h3>{stats.employers}</h3>
-                  <p>Employers</p>
-                </div>
-              </div>
-              <div className="stat-card">
-                <FileText size={32} />
-                <div className="stat-info">
-                  <h3>{stats.pendingDocs}</h3>
-                  <p>Pending Documents</p>
-                </div>
+                <div className="mini-progress"><div className="fill bg-maroon" style={{ width: '100%' }}></div></div>
               </div>
             </div>
           </div>
-        )}
 
-        {activeTab === 'users' && (
-          <div className="admin-users">
-            <h2>User Management</h2>
-            <div className="users-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map(u => (
-                    <tr key={u.id}>
-                      <td>{u.username}</td>
-                      <td>{u.email}</td>
-                      <td><span className={`badge ${u.user_type}`}>{u.user_type}</span></td>
-                      <td>{u.is_active ? 'Active' : 'Inactive'}</td>
-                      <td>
-                        <button className="btn-icon" title="View">
-                          <Eye size={16} />
-                        </button>
-                        {u.is_active && (
-                          <button className="btn-icon danger" title="Deactivate" onClick={() => handleDeactivateUser(u.id)}>
-                            <X size={16} />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <div className="card mt-6">
+            <h3>Quick Actions</h3>
+            <div className="flex flex-col gap-2 mt-4">
+              <button className="btn-outline-black btn-block" onClick={() => setActiveTab('Users')}>Manage Users</button>
+              <button className="btn-outline-maroon btn-block" onClick={() => setActiveTab('Reports')}>Platform Analytics</button>
             </div>
           </div>
-        )}
-
-        {activeTab === 'documents' && (
-          <div className="admin-documents">
-            <h2>Document Approvals</h2>
-            {documents.length === 0 ? (
-              <p className="empty-state">No pending documents</p>
-            ) : (
-              <div className="documents-list">
-                {documents.map(doc => (
-                  <div key={doc.id} className="document-card">
-                    <FileText size={24} />
-                    <div className="document-info">
-                      <h4>{doc.filename}</h4>
-                      <p>User ID: {doc.user_id}</p>
-                      <p>Uploaded: {doc.uploaded_at}</p>
-                    </div>
-                    <div className="document-actions">
-                      <button className="btn-approve" onClick={() => handleApproveDocument(doc.id)}>
-                        <Check size={16} />
-                        Approve
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className="admin-settings">
-            <h2>Admin Settings</h2>
-            <div className="settings-section">
-              <h3>General Settings</h3>
-              <div className="setting-item">
-                <label>Platform Name</label>
-                <input type="text" defaultValue="KaziLive" disabled />
-              </div>
-              <div className="setting-item">
-                <label>Admin Email</label>
-                <input type="email" defaultValue={user?.email || 'admin@kazilive.com'} />
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
+        </div>
+      </div>
     </div>
   );
-}
+
+  return (
+    <DashboardLayout menuItems={menuItems.map(item => ({ ...item, isActive: activeTab === item.id }))} role="admin">
+
+      {activeTab === 'Overview' && renderOverview()}
+      {activeTab === 'Users' && <AdminUsersView />}
+      {activeTab === 'Verifications' && <AdminVerificationsView />}
+      {activeTab === 'Reports' && <AdminReportsView />}
+      {activeTab === 'Payments' && <AdminPaymentsView />}
+    </DashboardLayout>
+
+  );
+};
 
 export default AdminDashboard;
