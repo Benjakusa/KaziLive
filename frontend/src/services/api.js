@@ -1,4 +1,5 @@
-const API_BASE_URL = '/api/auth';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/auth';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ? import.meta.env.VITE_API_BASE_URL.replace('/auth', '') : '/api';
 
 export async function register(userData) {
   const response = await fetch(`${API_BASE_URL}/register`, {
@@ -41,7 +42,7 @@ export async function login(credentials) {
 }
 
 export const updateProfile = async (userType, data, token) => {
-  const response = await fetch(`/api/${userType}/profile`, {
+  const response = await fetch(`${BASE_URL}/${userType}/profile`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -64,7 +65,7 @@ export const updateProfile = async (userType, data, token) => {
 };
 
 export const getJobseekers = async () => {
-  const response = await fetch('/api/employer/jobseekers');
+  const response = await fetch(`${BASE_URL}/employer/jobseekers`);
   const data = await response.json();
   return data;
 };
@@ -74,9 +75,9 @@ export const fetchProfile = async (role, token) => {
     throw new Error('Authentication token is missing or invalid');
   }
 
-  const endpoint = role === 'employer' ? '/api/employer/profile'
-    : role === 'jobseeker' ? '/api/jobseeker/profile'
-      : '/api/auth/me';
+  const endpoint = role === 'employer' ? `${BASE_URL}/employer/profile`
+    : role === 'jobseeker' ? `${BASE_URL}/jobseeker/profile`
+      : `${BASE_URL}/auth/me`;
 
   const response = await fetch(endpoint, {
     headers: { Authorization: `Bearer ${token}` },
@@ -92,7 +93,7 @@ export const uploadFile = async (file, fileType = 'cv') => {
   formData.append('file', file);
   formData.append('file_type', fileType);
 
-  const response = await fetch('/api/jobseeker/upload', {
+  const response = await fetch(`${BASE_URL}/jobseeker/upload`, {
     method: 'POST',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: formData,
