@@ -47,14 +47,33 @@ const AdminDashboard = () => {
   const [verifications, setVerifications] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const fetchWithRetry = async (url, options, retries = 3, delay = 2000) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const res = await fetch(url, options);
+        if (res.ok || res.status === 401 || res.status === 403) return res;
+        throw new Error(`HTTP ${res.status}`);
+      } catch (err) {
+        if (i === retries - 1) throw err;
+        await new Promise(r => setTimeout(r, delay * (i + 1)));
+      }
+    }
+  };
+
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
+      const headers = { 
+        'Authorization': `Bearer ${token}`,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      };
 
       const [statsRes, verifRes] = await Promise.all([
-        fetch(`${BASE_URL}/admin/stats`, { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch(`${BASE_URL}/admin/documents`, { headers: { 'Authorization': `Bearer ${token}` } })
+        fetchWithRetry(`${BASE_URL}/admin/stats`, { headers, cache: 'no-store' }),
+        fetchWithRetry(`${BASE_URL}/admin/documents`, { headers, cache: 'no-store' })
       ]);
 
       if (statsRes.status === 401 || verifRes.status === 401) {
@@ -63,13 +82,19 @@ const AdminDashboard = () => {
         return;
       }
 
-      if (statsRes.ok) setStats(await statsRes.json());
-      if (verifRes.ok) {
-        const docs = await verifRes.json();
-        setVerifications(docs.filter(d => d.status === 'Under Review').slice(0, 5));
+      if (statsRes.status === 304 || statsRes.ok) {
+        const text = await statsRes.text();
+        if (text) setStats(JSON.parse(text));
+      }
+      if (verifRes.status === 304 || verifRes.ok) {
+        const text = await verifRes.text();
+        if (text) {
+          const docs = JSON.parse(text);
+          setVerifications(docs.filter(d => d.status === 'Under Review').slice(0, 5));
+        }
       }
     } catch (err) {
-      console.error('Failed to load dashboard data');
+      console.error('Failed to load dashboard data:', err);
     } finally {
       setLoading(false);
     }
