@@ -51,7 +51,7 @@ const AdminDashboard = () => {
     for (let i = 0; i < retries; i++) {
       try {
         const res = await fetch(url, options);
-        if (res.ok || res.status === 401 || res.status === 403) return res;
+        if (res.ok || res.status === 304 || res.status === 401 || res.status === 403) return res;
         throw new Error(`HTTP ${res.status}`);
       } catch (err) {
         if (i === retries - 1) throw err;
@@ -64,7 +64,7 @@ const AdminDashboard = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const headers = { 
+      const headers = {
         'Authorization': `Bearer ${token}`,
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
@@ -72,10 +72,10 @@ const AdminDashboard = () => {
       };
 
       const cacheBust = `_t=${Date.now()}`;
-      const DIRECT_URL = 'https://kazilive-backend.onrender.com';
+      // Use BASE_URL from services/api now that it's centralized
       const [statsRes, verifRes] = await Promise.all([
-        fetchWithRetry(`${DIRECT_URL}/api/admin/stats?${cacheBust}`, { headers }),
-        fetchWithRetry(`${DIRECT_URL}/api/admin/documents?${cacheBust}`, { headers })
+        fetchWithRetry(`${BASE_URL}/admin/stats?${cacheBust}`, { headers }),
+        fetchWithRetry(`${BASE_URL}/admin/documents?${cacheBust}`, { headers })
       ]);
 
       if (statsRes.status === 401 || verifRes.status === 401) {

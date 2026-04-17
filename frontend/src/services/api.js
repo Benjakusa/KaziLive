@@ -1,4 +1,5 @@
-export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://kazilive-backend.onrender.com';
+const rawBackendUrl = import.meta.env.VITE_BACKEND_URL;
+export const BACKEND_URL = (rawBackendUrl && rawBackendUrl !== '/') ? rawBackendUrl : 'https://kazilive-backend.onrender.com';
 export const API_BASE_URL = `${BACKEND_URL}/api/auth`;
 export const BASE_URL = `${BACKEND_URL}/api`;
 
