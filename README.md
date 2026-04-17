@@ -3,7 +3,7 @@
 A full-stack job seeking platform connecting job seekers with employers in Kenya.
 
 **Live URLs:**
-- Frontend: https://kazi-live.vercel.app
+- Frontend: https://kazi-live-rtto.vercel.app/
 - Backend API: https://kazilive-backend.onrender.com
 
 ---

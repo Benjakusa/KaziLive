@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from '../../services/api';
 import { FileText, Upload, Trash2, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import Badge from '../shared/Badge';
@@ -13,7 +14,7 @@ const JobseekerDocumentsView = () => {
     const fetchDocuments = async () => {
         setLoading(true);
         try {
-            const response = await fetch('/api/jobseeker/documents', {
+            const response = await fetch(`${BASE_URL}/jobseeker/documents`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -46,7 +47,7 @@ const JobseekerDocumentsView = () => {
             formData.append('file_type', 'CV');
 
             try {
-                const response = await fetch('/api/jobseeker/upload', {
+                const response = await fetch(`${BASE_URL}/jobseeker/upload`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: formData
@@ -69,7 +70,7 @@ const JobseekerDocumentsView = () => {
         if (!window.confirm('Are you sure you want to delete this document?')) return;
 
         try {
-            const response = await fetch(`/api/jobseeker/documents/${id}`, {
+            const response = await fetch(`${BASE_URL}/jobseeker/documents/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -92,7 +93,7 @@ const JobseekerDocumentsView = () => {
 
         setLoading(true);
         try {
-            const response = await fetch('/api/jobseeker/request-verification', {
+            const response = await fetch(`${BASE_URL}/jobseeker/request-verification`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

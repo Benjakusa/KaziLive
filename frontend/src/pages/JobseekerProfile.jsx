@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { User, Briefcase, Mail, Phone, MapPin, FileText, Upload, Save, X, CheckCircle, Camera } from 'lucide-react';
-import { uploadFile, updateProfile } from '../services/api';
+import { uploadFile, updateProfile, BASE_URL } from '../services/api';
 
 const ALLOWED_TYPES = [
   'application/pdf',
@@ -20,11 +20,11 @@ export default function JobseekerProfile() {
   const [cvError, setCvError] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
-  
+
   const [profilePicture, setProfilePicture] = useState(null);
   const [profilePreview, setProfilePreview] = useState(null);
   const [profileUploading, setProfileUploading] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -38,18 +38,18 @@ export default function JobseekerProfile() {
   });
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  
+
   const token = localStorage.getItem('token');
-  
+
   useEffect(() => {
     if (token) {
       fetchProfile();
     }
   }, [token]);
-  
+
   const fetchProfile = async () => {
     try {
-      const response = await fetch('/api/jobseeker/profile', {
+      const response = await fetch(`${BASE_URL}/jobseeker/profile`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (response.ok) {
@@ -73,12 +73,12 @@ export default function JobseekerProfile() {
       console.error('Failed to load profile:', err);
     }
   };
-  
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setSaveSuccess(false);
   };
-  
+
   function validateAndSet(file) {
     setCvError('');
     setUploadSuccess(false);
@@ -93,39 +93,39 @@ export default function JobseekerProfile() {
     }
     setCvFile(file);
   }
-  
+
   function handleDropzoneClick() {
     fileInputRef.current?.click();
   }
-  
+
   function handleFileChange(e) {
     validateAndSet(e.target.files[0]);
     e.target.value = '';
   }
-  
+
   function handleDragOver(e) {
     e.preventDefault();
     setDragOver(true);
   }
-  
+
   function handleDragLeave(e) {
     e.preventDefault();
     setDragOver(false);
   }
-  
+
   function handleDrop(e) {
     e.preventDefault();
     setDragOver(false);
     validateAndSet(e.dataTransfer.files[0]);
   }
-  
+
   function handleRemove(e) {
     e.stopPropagation();
     setCvFile(null);
     setCvError('');
     setUploadSuccess(false);
   }
-  
+
   async function handleUpload(e) {
     e.stopPropagation();
     if (!cvFile) return;
@@ -139,7 +139,7 @@ export default function JobseekerProfile() {
       setUploading(false);
     }
   }
-  
+
   const handleProfilePictureChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -158,7 +158,7 @@ export default function JobseekerProfile() {
     }
     e.target.value = '';
   };
-  
+
   const handleProfileUpload = async () => {
     if (!profilePicture) return;
     setProfileUploading(true);
@@ -174,7 +174,7 @@ export default function JobseekerProfile() {
       setProfileUploading(false);
     }
   };
-  
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -205,11 +205,11 @@ export default function JobseekerProfile() {
       <div className="card-body">
         <div className="flex-center-gap" style={{ marginBottom: '32px' }}>
           <div style={{ position: 'relative' }}>
-            <div 
-              className="avatar" 
-              style={{ 
-                width: '80px', 
-                height: '80px', 
+            <div
+              className="avatar"
+              style={{
+                width: '80px',
+                height: '80px',
                 fontSize: '2rem',
                 background: profilePreview ? `url(${profilePreview}) center/cover` : '#e5e7eb',
                 borderRadius: '50%',
@@ -251,8 +251,8 @@ export default function JobseekerProfile() {
             <h3 style={{ marginBottom: '4px' }}>{formData.fullName || 'Job Seeker'}</h3>
             <p className="text-muted">Update your profile to get noticed</p>
             {profilePicture && (
-              <button 
-                className="btn btn-secondary" 
+              <button
+                className="btn btn-secondary"
                 style={{ padding: '4px 12px', fontSize: '0.8rem', marginTop: '8px' }}
                 onClick={handleProfileUpload}
                 disabled={profileUploading}
@@ -268,11 +268,11 @@ export default function JobseekerProfile() {
             <label className="form-label">Full Name</label>
             <div className="input-icon-wrapper">
               <User size={18} />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 name="fullName"
-                className="form-input" 
-                placeholder="Njeri Muthoni" 
+                className="form-input"
+                placeholder="Njeri Muthoni"
                 value={formData.fullName}
                 onChange={handleChange}
               />
@@ -282,11 +282,11 @@ export default function JobseekerProfile() {
             <label className="form-label">Email</label>
             <div className="input-icon-wrapper">
               <Mail size={18} />
-              <input 
-                type="email" 
+              <input
+                type="email"
                 name="email"
-                className="form-input" 
-                placeholder="njeri@email.co.ke" 
+                className="form-input"
+                placeholder="njeri@email.co.ke"
                 value={formData.email}
                 onChange={handleChange}
                 disabled
@@ -297,11 +297,11 @@ export default function JobseekerProfile() {
             <label className="form-label">Phone (M-Pesa)</label>
             <div className="input-icon-wrapper">
               <Phone size={18} />
-              <input 
-                type="tel" 
+              <input
+                type="tel"
                 name="phone"
-                className="form-input" 
-                placeholder="0712 345 678" 
+                className="form-input"
+                placeholder="0712 345 678"
                 value={formData.phone}
                 onChange={handleChange}
                 disabled
@@ -312,24 +312,24 @@ export default function JobseekerProfile() {
             <label className="form-label">Location</label>
             <div className="input-icon-wrapper">
               <MapPin size={18} />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 name="location"
-                className="form-input" 
-                placeholder="Westlands, Nairobi" 
+                className="form-input"
+                placeholder="Westlands, Nairobi"
                 value={formData.location}
                 onChange={handleChange}
               />
             </div>
           </div>
         </div>
-        
+
         <div className="grid-2">
           <div className="form-group">
             <label className="form-label">Job Category</label>
             <div className="input-icon-wrapper">
               <Briefcase size={18} />
-              <select 
+              <select
                 name="jobCategory"
                 className="form-input"
                 value={formData.jobCategory}
@@ -353,11 +353,11 @@ export default function JobseekerProfile() {
             <label className="form-label">Expected Salary (KSh)</label>
             <div className="input-icon-wrapper">
               <FileText size={18} />
-              <input 
-                type="number" 
+              <input
+                type="number"
                 name="expectedSalary"
-                className="form-input" 
-                placeholder="120,000" 
+                className="form-input"
+                placeholder="120,000"
                 value={formData.expectedSalary}
                 onChange={handleChange}
               />
@@ -367,11 +367,11 @@ export default function JobseekerProfile() {
             <label className="form-label">Years of Experience</label>
             <div className="input-icon-wrapper">
               <Briefcase size={18} />
-              <input 
-                type="number" 
+              <input
+                type="number"
                 name="yearsOfExperience"
-                className="form-input" 
-                placeholder="2" 
+                className="form-input"
+                placeholder="2"
                 min="0"
                 value={formData.yearsOfExperience}
                 onChange={handleChange}
@@ -382,9 +382,9 @@ export default function JobseekerProfile() {
 
         <div className="form-group">
           <label className="form-label">Bio / About</label>
-          <textarea 
+          <textarea
             name="bio"
-            className="form-input" 
+            className="form-input"
             placeholder="Tell employers about yourself..."
             rows={3}
             value={formData.bio}
@@ -396,11 +396,11 @@ export default function JobseekerProfile() {
           <label className="form-label">Skills</label>
           <div className="input-icon-wrapper">
             <Briefcase size={18} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               name="skills"
-              className="form-input" 
-              placeholder="React, Python, SQL, Django..." 
+              className="form-input"
+              placeholder="React, Python, SQL, Django..."
               value={formData.skills}
               onChange={handleChange}
             />

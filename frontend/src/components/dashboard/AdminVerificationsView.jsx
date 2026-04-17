@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from '../../services/api';
 import { CheckSquare, Eye, Check, X, FileText, Loader, ExternalLink, Trash2, Search, Filter } from 'lucide-react';
 import Badge from '../shared/Badge';
 
@@ -15,7 +16,7 @@ const AdminVerificationsView = () => {
 
         setLoading(true);
         try {
-            const response = await fetch('/api/admin/documents', {
+            const response = await fetch(`${BASE_URL}/admin/documents`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -47,7 +48,7 @@ const AdminVerificationsView = () => {
         }
 
         try {
-            const response = await fetch(`/api/admin/documents/${id}/${action}`, {
+            const response = await fetch(`${BASE_URL}/admin/documents/${id}/${action}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -75,7 +76,7 @@ const AdminVerificationsView = () => {
         if (!token) return;
 
         try {
-            const response = await fetch(`/api/admin/documents/${id}`, {
+            const response = await fetch(`${BASE_URL}/admin/documents/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

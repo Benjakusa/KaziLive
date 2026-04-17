@@ -1,11 +1,12 @@
 import React from 'react';
+import { BASE_URL } from '../../services/api';
 import { Settings, Lock, Bell, Eye, EyeOff, Shield } from 'lucide-react';
 
 const JobseekerSettingsView = () => {
     const handleDeleteAccount = async () => {
         if (window.confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.')) {
             try {
-                const response = await fetch('/api/jobseeker/profile', {
+                const response = await fetch(`${BASE_URL}/jobseeker/profile`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
                 });

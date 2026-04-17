@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from '../../services/api';
 import { Bell, MessageSquare, Briefcase, Info, Clock, Loader, Inbox } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
@@ -11,7 +12,7 @@ const JobseekerNotificationsView = () => {
     const fetchNotifications = async () => {
         setLoading(true);
         try {
-            const response = await fetch('/api/notifications', {
+            const response = await fetch(`${BASE_URL}/notifications`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -33,7 +34,7 @@ const JobseekerNotificationsView = () => {
 
     const handleMarkAllRead = async () => {
         try {
-            const response = await fetch('/api/notifications/read-all', {
+            const response = await fetch(`${BASE_URL}/notifications/read-all`, {
                 method: 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

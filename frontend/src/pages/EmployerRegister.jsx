@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Building, Phone, MapPin, LogIn, User, Camera, Upload } from 'lucide-react';
-import { register } from '../services/api';
+import { register, BASE_URL } from '../services/api';
 
 export default function EmployerRegister() {
   const navigate = useNavigate();
@@ -56,7 +56,7 @@ export default function EmployerRegister() {
         uploadFormData.append('file', logoFile);
         uploadFormData.append('file_type', 'company_logo');
 
-        const uploadResponse = await fetch('/api/jobseeker/upload-public', {
+        const uploadResponse = await fetch(`${BASE_URL}/jobseeker/upload-public`, {
           method: 'POST',
           body: uploadFormData,
         });

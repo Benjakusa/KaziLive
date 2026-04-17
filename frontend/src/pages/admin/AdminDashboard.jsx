@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../features/auth/authSlice';
 import DashboardLayout from '../../components/layout/DashboardLayout';
+import { BASE_URL } from '../../services/api';
 import {
   LayoutDashboard,
   Users,
@@ -52,8 +53,8 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('token');
 
       const [statsRes, verifRes] = await Promise.all([
-        fetch('/api/admin/stats', { headers: { 'Authorization': `Bearer ${token}` } }),
-        fetch('/api/admin/documents', { headers: { 'Authorization': `Bearer ${token}` } })
+        fetch(`${BASE_URL}/admin/stats`, { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch(`${BASE_URL}/admin/documents`, { headers: { 'Authorization': `Bearer ${token}` } })
       ]);
 
       if (statsRes.status === 401 || verifRes.status === 401) {

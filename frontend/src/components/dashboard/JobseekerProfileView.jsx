@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from '../../services/api';
 import { User, Mail, Phone, MapPin, Briefcase, Plus, X, Loader } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import defaultAvatar from '../../assets/default-avatar.png';
@@ -42,7 +43,7 @@ const JobseekerProfileView = ({ user: initialUser }) => {
         setLoading(true);
         setMessage('');
         try {
-            const response = await fetch('/api/jobseeker/profile', {
+            const response = await fetch(`${BASE_URL}/jobseeker/profile`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -85,7 +86,7 @@ const JobseekerProfileView = ({ user: initialUser }) => {
             formData.append('file_type', 'profile_picture');
 
             try {
-                const response = await fetch('/api/jobseeker/upload', {
+                const response = await fetch(`${BASE_URL}/jobseeker/upload`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` },
                     body: formData

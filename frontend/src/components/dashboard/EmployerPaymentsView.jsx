@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from '../../services/api';
 import { CreditCard, ArrowUpRight, ArrowDownLeft, Clock, Plus, Smartphone, CheckCircle, Loader, CircleSlash } from 'lucide-react';
 import Badge from '../shared/Badge';
 import { useSelector } from 'react-redux';
@@ -16,7 +17,7 @@ const EmployerPaymentsView = () => {
     const fetchPayments = async () => {
         setFetching(true);
         try {
-            const response = await fetch('/api/employer/payments', {
+            const response = await fetch(`${BASE_URL}/employer/payments`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -40,7 +41,7 @@ const EmployerPaymentsView = () => {
         setMessage('');
 
         try {
-            const response = await fetch('/api/employer/stk-push', {
+            const response = await fetch(`${BASE_URL}/employer/stk-push`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

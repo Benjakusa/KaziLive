@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Phone, MapPin, User, Briefcase, FileText, Upload, LogIn, Lock, Camera } from 'lucide-react';
-import { register } from '../services/api';
+import { register, BASE_URL } from '../services/api';
 import defaultAvatar from '../assets/default-avatar.png';
 
 export default function JobseekerRegister() {
@@ -61,7 +61,7 @@ export default function JobseekerRegister() {
         uploadFormData.append('file', formData.profilePicture);
         uploadFormData.append('file_type', 'profile_picture');
 
-        const uploadResponse = await fetch('/api/jobseeker/upload-public', {
+        const uploadResponse = await fetch(`${BASE_URL}/jobseeker/upload-public`, {
           method: 'POST',
           body: uploadFormData,
         });

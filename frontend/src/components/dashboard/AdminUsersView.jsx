@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from '../../services/api';
 import { Users, Search, Edit3, ShieldAlert, CheckCircle, Loader, Ban, Trash2 } from 'lucide-react';
 import Badge from '../shared/Badge';
 
@@ -14,7 +15,7 @@ const AdminUsersView = () => {
 
         setLoading(true);
         try {
-            const response = await fetch('/api/admin/users', {
+            const response = await fetch(`${BASE_URL}/admin/users`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -48,7 +49,7 @@ const AdminUsersView = () => {
         if (!window.confirm(confirmMsg)) return;
 
         try {
-            const endpoint = action === 'delete' ? `/api/admin/users/${userId}` : `/api/admin/users/${userId}/${action}`;
+            const endpoint = action === 'delete' ? `${BASE_URL}/admin/users/${userId}` : `${BASE_URL}/admin/users/${userId}/${action}`;
             const response = await fetch(endpoint, {
                 method: action === 'delete' ? 'DELETE' : 'PUT',
                 headers: { 'Authorization': `Bearer ${token}` }

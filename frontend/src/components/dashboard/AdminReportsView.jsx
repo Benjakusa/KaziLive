@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, TrendingUp, Users, CreditCard, Loader } from 'lucide-react';
 import Chart from '../shared/Chart';
+import { BASE_URL } from '../../services/api';
 
 const AdminReportsView = () => {
     const [stats, setStats] = useState(null);
@@ -13,7 +14,7 @@ const AdminReportsView = () => {
 
         setLoading(true);
         try {
-            const response = await fetch('/api/admin/stats', {
+            const response = await fetch(`${BASE_URL}/admin/stats`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from '../../services/api';
 import { Briefcase, Plus, Users, Eye, Edit3, Trash2, Loader, MessageSquare } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import Badge from '../shared/Badge';
@@ -12,7 +13,7 @@ const EmployerJobsView = () => {
     const fetchContacts = async () => {
         setLoading(true);
         try {
-            const response = await fetch('/api/employer/contacts', {
+            const response = await fetch(`${BASE_URL}/employer/contacts`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();

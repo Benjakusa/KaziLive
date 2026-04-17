@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from '../../services/api';
 import { CreditCard, Users, CheckCircle, Clock, AlertCircle, DollarSign, Smartphone, BadgeCheck, ShieldOff } from 'lucide-react';
 import Badge from '../shared/Badge';
 import DataTable from '../shared/DataTable';
@@ -13,7 +14,7 @@ const AdminPaymentsView = () => {
 
     const fetchData = async () => {
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
             setDebugInfo('No token in localStorage. Please re-login.');
             return;
@@ -22,10 +23,10 @@ const AdminPaymentsView = () => {
         setDebugInfo('Fetching data...');
         try {
             const headers = { 'Authorization': `Bearer ${token}` };
-            
-            const empRes = await fetch('/api/admin/employers', { headers });
+
+            const empRes = await fetch(`${BASE_URL}/admin/employers`, { headers });
             console.log('employers response status:', empRes.status);
-            
+
             if (empRes.ok) {
                 const empData = await empRes.json();
                 console.log('employers data:', empData);
@@ -42,8 +43,8 @@ const AdminPaymentsView = () => {
                 console.log('employers error:', error);
                 setDebugInfo(`Error: ${empRes.status} - ${error}`);
             }
-            
-            const payRes = await fetch('/api/admin/payments', { headers });
+
+            const payRes = await fetch(`${BASE_URL}/admin/payments`, { headers });
             if (payRes.ok) {
                 const payData = await payRes.json();
                 setPayments(payData);
@@ -75,13 +76,13 @@ const AdminPaymentsView = () => {
             <div className="section-header-flex">
                 <h2>Payment & Token Management</h2>
                 <div className="flex gap-2">
-                    <button 
+                    <button
                         className={`btn ${activeView === 'employers' ? 'btn-primary' : 'btn-outline'}`}
                         onClick={() => setActiveView('employers')}
                     >
                         <Users size={16} /> Employers & Tokens
                     </button>
-                    <button 
+                    <button
                         className={`btn ${activeView === 'payments' ? 'btn-primary' : 'btn-outline'}`}
                         onClick={() => setActiveView('payments')}
                     >
@@ -208,10 +209,10 @@ const AdminPaymentsView = () => {
                                 header: 'Status',
                                 accessor: 'status',
                                 render: (status) => (
-                                    <Badge 
+                                    <Badge
                                         variant={
-                                            status === 'completed' ? 'success' : 
-                                            status === 'pending' ? 'yellow' : 'error'
+                                            status === 'completed' ? 'success' :
+                                                status === 'pending' ? 'yellow' : 'error'
                                         }
                                     >
                                         {status}

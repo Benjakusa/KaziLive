@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_URL } from '../../services/api';
 import { Briefcase, MapPin, Clock, MessageSquare, Loader } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import Badge from '../shared/Badge';
@@ -12,7 +13,7 @@ const JobseekerApplicationsView = () => {
     const fetchContacts = async () => {
         setLoading(true);
         try {
-            const response = await fetch('/api/jobseeker/contacts', {
+            const response = await fetch(`${BASE_URL}/jobseeker/contacts`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
