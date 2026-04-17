@@ -14,7 +14,7 @@ const AdminReportsView = () => {
 
         setLoading(true);
         try {
-            const response = await fetch(`${BASE_URL}/admin/stats`, {
+            const response = await fetch(`${BASE_URL}/admin/stats?_t=${Date.now()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();

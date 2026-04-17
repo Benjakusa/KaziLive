@@ -15,7 +15,7 @@ const AdminUsersView = () => {
 
         setLoading(true);
         try {
-            const response = await fetch(`${BASE_URL}/admin/users`, {
+            const response = await fetch(`${BASE_URL}/admin/users?_t=${Date.now()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();

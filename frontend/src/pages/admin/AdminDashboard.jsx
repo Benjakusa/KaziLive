@@ -71,9 +71,10 @@ const AdminDashboard = () => {
         'Expires': '0'
       };
 
+      const cacheBust = `_t=${Date.now()}`;
       const [statsRes, verifRes] = await Promise.all([
-        fetchWithRetry(`${BASE_URL}/admin/stats`, { headers, cache: 'no-store' }),
-        fetchWithRetry(`${BASE_URL}/admin/documents`, { headers, cache: 'no-store' })
+        fetchWithRetry(`${BASE_URL}/admin/stats?${cacheBust}`, { headers }),
+        fetchWithRetry(`${BASE_URL}/admin/documents?${cacheBust}`, { headers })
       ]);
 
       if (statsRes.status === 401 || verifRes.status === 401) {

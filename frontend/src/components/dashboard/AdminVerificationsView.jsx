@@ -16,7 +16,7 @@ const AdminVerificationsView = () => {
 
         setLoading(true);
         try {
-            const response = await fetch(`${BASE_URL}/admin/documents`, {
+            const response = await fetch(`${BASE_URL}/admin/documents?_t=${Date.now()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
