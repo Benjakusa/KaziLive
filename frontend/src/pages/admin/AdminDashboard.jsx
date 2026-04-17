@@ -72,9 +72,10 @@ const AdminDashboard = () => {
       };
 
       const cacheBust = `_t=${Date.now()}`;
+      const DIRECT_URL = 'https://kazilive-backend.onrender.com';
       const [statsRes, verifRes] = await Promise.all([
-        fetchWithRetry(`${BASE_URL}/admin/stats?${cacheBust}`, { headers }),
-        fetchWithRetry(`${BASE_URL}/admin/documents?${cacheBust}`, { headers })
+        fetchWithRetry(`${DIRECT_URL}/api/admin/stats?${cacheBust}`, { headers }),
+        fetchWithRetry(`${DIRECT_URL}/api/admin/documents?${cacheBust}`, { headers })
       ]);
 
       if (statsRes.status === 401 || verifRes.status === 401) {

@@ -14,7 +14,7 @@ const AdminReportsView = () => {
 
         setLoading(true);
         try {
-            const response = await fetch(`${BASE_URL}/admin/stats?_t=${Date.now()}`, {
+            const response = await fetch(`https://kazilive-backend.onrender.com/api/admin/stats?_t=${Date.now()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();

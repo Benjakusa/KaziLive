@@ -24,7 +24,7 @@ const AdminPaymentsView = () => {
         try {
             const headers = { 'Authorization': `Bearer ${token}` };
 
-            const empRes = await fetch(`${BASE_URL}/admin/employers?_t=${Date.now()}`, { headers });
+            const empRes = await fetch(`https://kazilive-backend.onrender.com/api/admin/employers?_t=${Date.now()}`, { headers });
             console.log('employers response status:', empRes.status);
 
             if (empRes.ok) {
@@ -44,7 +44,7 @@ const AdminPaymentsView = () => {
                 setDebugInfo(`Error: ${empRes.status} - ${error}`);
             }
 
-            const payRes = await fetch(`${BASE_URL}/admin/payments?_t=${Date.now()}`, { headers });
+            const payRes = await fetch(`https://kazilive-backend.onrender.com/api/admin/payments?_t=${Date.now()}`, { headers });
             if (payRes.ok) {
                 const payData = await payRes.json();
                 setPayments(payData);
