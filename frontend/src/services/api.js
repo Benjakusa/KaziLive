@@ -3,7 +3,7 @@ import axios from "axios";
 // ===============================
 // 🌐 BASE URL
 // ===============================
-export const BASE_URL = "https://kazilive-backend.onrender.com";
+export const BASE_URL = "http://localhost:5001";
 
 // ===============================
 // ⚙️ AXIOS INSTANCE
