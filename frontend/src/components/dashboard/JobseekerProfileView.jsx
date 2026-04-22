@@ -1,238 +1,208 @@
-import React, { useState, useEffect } from 'react';
-import { BASE_URL } from '../../services/api';
-import { User, Mail, Phone, MapPin, Briefcase, Plus, X, Loader } from 'lucide-react';
-import { useSelector } from 'react-redux';
-import defaultAvatar from '../../assets/default-avatar.png';
+import React, { useEffect, useState } from "react";
+import { getProfile, updateProfile, uploadFile } from "../../services/api"; 
+export default function JobseekerProfileView() {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-const JobseekerProfileView = ({ user: initialUser }) => {
-    const { token } = useSelector((state) => state.auth);
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState('');
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    phone: "",
+    location: "",
+  });
 
-    const [profile, setProfile] = useState({
-        name: initialUser?.name || initialUser?.full_name || '',
-        email: initialUser?.email || '',
-        phone: initialUser?.phone || '',
-        location: initialUser?.location || '',
-        role: initialUser?.job_category || '',
-        about: initialUser?.bio || '',
-        skills: initialUser?.skills || [],
-        profile_pic: initialUser?.profile_picture || defaultAvatar
-    });
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
 
-    useEffect(() => {
-        if (initialUser) {
-            setProfile({
-                name: initialUser.name || initialUser.full_name || '',
-                email: initialUser.email || '',
-                phone: initialUser.phone || '',
-                location: initialUser.location || '',
-                role: initialUser.job_category || '',
-                about: initialUser.bio || '',
-                skills: initialUser.skills || [],
-                profile_pic: initialUser.profile_picture || defaultAvatar
-            });
-            setAvatarPreview(initialUser.profile_picture || defaultAvatar);
-        }
-    }, [initialUser]);
-
-    const [avatarPreview, setAvatarPreview] = useState(profile.profile_pic);
-    const [newSkill, setNewSkill] = useState('');
-
-    const handleSave = async () => {
+  // =========================
+  // LOAD PROFILE
+  // =========================
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
         setLoading(true);
-        setMessage('');
-        try {
-            const response = await fetch(`${BASE_URL}/jobseeker/profile`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    full_name: profile.name,
-                    email: profile.email,
-                    phone: profile.phone,
-                    location: profile.location,
-                    job_category: profile.role,
-                    bio: profile.about,
-                    skills: profile.skills
-                })
-            });
+        setError("");
 
-            const data = await response.json();
-            if (response.ok) {
-                setMessage('Profile updated successfully!');
-            } else {
-                setMessage(`Error: ${data.error}${data.details ? ` - ${data.details}` : ''}`);
-            }
-        } catch (err) {
-            setMessage('Failed to save profile changes. Please check your connection.');
-        } finally {
-            setLoading(false);
-        }
+        const data = await getProfile();
+        const safe = data || {};
+
+        setProfile(safe);
+
+        setFormData({
+          username: safe.username || "",
+          email: safe.email || "",
+          phone: safe.phone || "",
+          location: safe.location || "",
+        });
+      } catch (err) {
+        console.error("PROFILE LOAD ERROR:", err);
+        setError(err?.message || "Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const handleAvatarChange = async (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => setAvatarPreview(reader.result);
-            reader.readAsDataURL(file);
+    loadProfile();
+  }, []);
 
-            // Upload to backend
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('file_type', 'profile_picture');
+  // =========================
+  // INPUT HANDLER
+  // =========================
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
-            try {
-                const response = await fetch(`${BASE_URL}/jobseeker/upload`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData
-                });
-                if (response.ok) {
-                    setMessage('Profile picture uploaded!');
-                }
-            } catch (err) {
-                console.error('Avatar upload failed', err);
-            }
-        }
-    };
+  // =========================
+  // FILE PREVIEW
+  // =========================
+  const handleFileChange = (e) => {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
 
-    const addSkill = () => {
-        if (newSkill && !profile.skills.includes(newSkill)) {
-            setProfile({ ...profile, skills: [...profile.skills, newSkill] });
-            setNewSkill('');
-        }
-    };
+    setFile(selected);
 
-    const removeSkill = (skill) => {
-        setProfile({ ...profile, skills: profile.skills.filter(s => s !== skill) });
-    };
+    const reader = new FileReader();
+    reader.onloadend = () => setPreview(reader.result);
+    reader.readAsDataURL(selected);
+  };
 
+  // =========================
+  // ✅ FIXED SAVE PROFILE
+  // =========================
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+
+    try {
+      let avatarUrl = profile?.avatar || "";
+
+      // upload image first if selected
+      if (file) {
+        const uploadRes = await uploadFile(file, "profile");
+        avatarUrl = uploadRes?.url || avatarUrl;
+      }
+
+      const payload = {
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        location: formData.location.trim(),
+        avatar: avatarUrl,
+      };
+
+      console.log("🚀 SENDING PROFILE UPDATE:", payload);
+
+      const updated = await updateProfile(payload);
+
+      console.log("✅ PROFILE UPDATED:", updated);
+
+      const finalData = updated || payload;
+
+      setProfile(finalData);
+
+      // sync UI immediately
+      setFormData({
+        username: finalData.username || "",
+        email: finalData.email || "",
+        phone: finalData.phone || "",
+        location: finalData.location || "",
+      });
+
+      alert("Profile updated successfully ✅");
+    } catch (err) {
+      console.error("❌ UPDATE ERROR:", err);
+
+      setError(
+        err?.message ||
+        err?.error ||
+        "Failed to update profile"
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // =========================
+  // LOADING STATE
+  // =========================
+  if (loading) {
     return (
-        <div className="dashboard-content-area">
-            <div className="section-header-flex">
-                <h2>My Professional Profile</h2>
-                <button className="btn-maroon" onClick={handleSave} disabled={loading}>
-                    {loading ? <Loader size={16} className="animate-spin" /> : 'Save Changes'}
-                </button>
-            </div>
-
-            {message && (
-                <div className={`alert mt-4 ${message.includes('Error') ? 'alert-error' : 'alert-success'}`}>
-                    {message}
-                </div>
-            )}
-
-            <div className="card mt-6">
-                <div className="profile-upload-section mb-6">
-                    <div className="avatar-preview-wrapper" onClick={() => document.getElementById('avatar-input').click()}>
-                        <img src={avatarPreview || defaultAvatar} alt="Avatar" />
-                        <div className="avatar-overlay">
-                            <span>Change</span>
-                        </div>
-                    </div>
-                    <input
-                        type="file"
-                        id="avatar-input"
-                        hidden
-                        accept="image/*"
-                        onChange={handleAvatarChange}
-                    />
-                    <div className="upload-info">
-                        <h4>Profile Picture</h4>
-                        <p className="text-muted small">PNG, JPG or GIF. Max 2MB.</p>
-                    </div>
-                </div>
-
-                <div className="grid-2-col">
-                    <div className="form-group">
-                        <label><User size={14} /> Full Name</label>
-                        <input
-                            type="text"
-                            className="form-input"
-                            value={profile.name}
-                            onChange={e => setProfile({ ...profile, name: e.target.value })}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label><Mail size={14} /> Email Address</label>
-                        <input
-                            type="email"
-                            className="form-input"
-                            value={profile.email}
-                            onChange={e => setProfile({ ...profile, email: e.target.value })}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label><Phone size={14} /> Phone Number</label>
-                        <input
-                            type="text"
-                            className="form-input"
-                            value={profile.phone}
-                            onChange={e => setProfile({ ...profile, phone: e.target.value })}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label><MapPin size={14} /> Location</label>
-                        <input
-                            type="text"
-                            className="form-input"
-                            value={profile.location}
-                            onChange={e => setProfile({ ...profile, location: e.target.value })}
-                        />
-                    </div>
-                </div>
-
-                <div className="form-group mt-4">
-                    <label><Briefcase size={14} /> Professional Role</label>
-                    <input
-                        type="text"
-                        className="form-input"
-                        value={profile.role}
-                        onChange={e => setProfile({ ...profile, role: e.target.value })}
-                    />
-                </div>
-
-                <div className="form-group mt-4">
-                    <label>Bio / Summary</label>
-                    <textarea
-                        className="form-input"
-                        rows="4"
-                        value={profile.about}
-                        onChange={e => setProfile({ ...profile, about: e.target.value })}
-                    ></textarea>
-                </div>
-            </div>
-
-            <div className="card mt-6">
-                <h3>Skills & Expertise</h3>
-                <div className="skills-entry-area mt-4">
-                    <div className="input-with-button">
-                        <input
-                            type="text"
-                            className="form-input"
-                            placeholder="Add a skill (e.g. Python)"
-                            value={newSkill}
-                            onChange={e => setNewSkill(e.target.value)}
-                            onKeyPress={e => e.key === 'Enter' && addSkill()}
-                        />
-                        <button className="btn-icon-maroon" onClick={addSkill}><Plus size={20} /></button>
-                    </div>
-                    <div className="tag-cloud mt-4">
-                        {profile.skills.map(skill => (
-                            <span key={skill} className="skill-edit-tag">
-                                {skill}
-                                <button onClick={() => removeSkill(skill)}><X size={12} /></button>
-                            </span>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div className="card">
+        <p>Loading profile...</p>
+      </div>
     );
-};
+  }
 
-export default JobseekerProfileView;
+  return (
+    <div className="card">
+      <h2>My Profile</h2>
+
+      {error && (
+        <div style={{ color: "red", marginBottom: 10 }}>
+          {error}
+        </div>
+      )}
+
+      {/* AVATAR */}
+      <div style={{ marginBottom: 20 }}>
+        <img
+          src={
+            preview ||
+            profile?.avatar ||
+            "https://via.placeholder.com/100"
+          }
+          alt="avatar"
+          style={{
+            width: 100,
+            height: 100,
+            borderRadius: "50%",
+            objectFit: "cover",
+          }}
+        />
+      </div>
+
+      <input type="file" accept="image/*" onChange={handleFileChange} />
+
+      {/* FORM */}
+      <form onSubmit={handleSubmit}>
+        <input
+          name="username"
+          placeholder="Username"
+          value={formData.username}
+          onChange={handleChange}
+        />
+
+        <input
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+        />
+
+        <input
+          name="phone"
+          placeholder="Phone"
+          value={formData.phone}
+          onChange={handleChange}
+        />
+
+        <input
+          name="location"
+          placeholder="Location"
+          value={formData.location}
+          onChange={handleChange}
+        />
+
+        <button type="submit" disabled={saving}>
+          {saving ? "Saving..." : "Update Profile"}
+        </button>
+      </form>
+    </div>
+  );
+} 

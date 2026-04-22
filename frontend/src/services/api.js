@@ -1,6 +1,8 @@
 import axios from "axios";
 
+// ===============================
 // 🌐 BASE URL
+// ===============================
 export const BASE_URL = "https://kazilive-backend.onrender.com";
 
 // ===============================
@@ -11,51 +13,41 @@ const API = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true,
 });
-
-// ===============================
-// 🔐 REQUEST INTERCEPTOR (AUTO TOKEN ATTACH)
-// ===============================
-API.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// ===============================
-// 🔄 RESPONSE INTERCEPTOR (CLEAN ERRORS)
-// ===============================
-API.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    return Promise.reject(
-      error?.response?.data || {
-        message: "Network error. Please try again.",
-      }
-    );
-  }
-);
 
 // ===============================
 // 🔐 AUTH
 // ===============================
 
-export const register = async (data) => {
-  const res = await API.post("/api/auth/register", data);
-  return res.data;
+// REGISTER (FIXED + SAFE)
+export const register = async (userData) => {
+  try {
+    const res = await API.post("/api/auth/register", userData);
+    return res.data;
+  } catch (error) {
+    console.error("REGISTER ERROR:", error?.response?.data || error.message);
+    throw error?.response?.data || { message: "Registration failed" };
+  }
 };
 
+// LOGIN (FIXED NORMALIZED PAYLOAD)
 export const login = async (credentials) => {
-  const res = await API.post("/api/auth/login", credentials);
-  return res.data;
+  try {
+    const payload = {
+      identifier:
+        credentials.identifier ||
+        credentials.email ||
+        credentials.username ||
+        credentials.phone,
+      password: credentials.password,
+    };
+
+    const res = await API.post("/api/auth/login", payload);
+    return res.data;
+  } catch (error) {
+    console.error("LOGIN ERROR:", error?.response?.data || error.message);
+    throw error?.response?.data || { message: "Login failed" };
+  }
 };
 
 // ===============================
@@ -63,65 +55,87 @@ export const login = async (credentials) => {
 // ===============================
 
 export const getProfile = async () => {
-  const res = await API.get("/api/users/profile");
-  return res.data;
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await API.get("/api/users/profile", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    console.error("GET PROFILE ERROR:", error?.response?.data || error.message);
+    throw error?.response?.data || { message: "Failed to fetch profile" };
+  }
 };
 
 export const fetchProfile = getProfile;
 
+// ===============================
+// ✏️ UPDATE PROFILE
+// ===============================
+
 export const updateProfile = async (data) => {
-  const res = await API.put("/api/users/profile", data);
-  return res.data;
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await API.put("/api/users/profile", data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    console.error("UPDATE PROFILE ERROR:", error?.response?.data || error.message);
+    throw error?.response?.data || { message: "Profile update failed" };
+  }
 };
 
 // ===============================
-// 📤 FILE UPLOAD (CV / AVATAR)
+// 📤 FILE UPLOAD (GENERIC FIXED)
 // ===============================
 
-export const uploadFile = async (file, type = "general") => {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("file_type", type);
+export const uploadFile = async (file, fileType = "general") => {
+  try {
+    const token = localStorage.getItem("token");
 
-  const res = await API.post("/jobseeker/upload-public", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("file_type", fileType);
 
-  return res.data;
+    const res = await API.post("/jobseeker/upload-public", formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    console.error("UPLOAD ERROR:", error?.response?.data || error.message);
+    throw error?.response?.data || { message: "Upload failed" };
+  }
 };
+
+// ===============================
+// 🏢 EMPLOYER LOGO UPLOAD (FIXED EXPORT)
+// ===============================
 
 export const uploadCompanyLogo = (file) => {
   return uploadFile(file, "company_logo");
 };
 
 // ===============================
-// 💼 JOB OFFERS (NEW - READY FOR YOUR UI)
+// 🔁 BACKWARD COMPATIBILITY HELPERS
 // ===============================
 
-// Accept offer
-export const acceptOffer = async (offerId) => {
-  const res = await API.post(`/api/offers/${offerId}/accept`);
-  return res.data;
-};
-
-// Decline offer
-export const declineOffer = async (offerId) => {
-  const res = await API.post(`/api/offers/${offerId}/decline`);
-  return res.data;
-};
+// some components still use this name
+export const loginUser = login;
 
 // ===============================
-// 🔑 PASSWORD CHANGE (NEW)
-// ===============================
-
-export const changePassword = async (data) => {
-  const res = await API.put("/api/users/change-password", data);
-  return res.data;
-};
-
-// ===============================
-// EXPORT INSTANCE
+// DEFAULT EXPORT
 // ===============================
 export default API; 

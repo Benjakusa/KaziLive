@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import DataTable from "../../components/shared/DataTable";
+import { BASE_URL } from "../../services/api";
 
 import {
   LayoutDashboard,
@@ -39,9 +40,25 @@ const JobseekerDashboard = () => {
     },
   ]);
 
-  // ✅ OFFER ACTION
-  const handleOfferAction = (id) => {
-    setOffers((prev) => prev.filter((offer) => offer.id !== id));
+  // ✅ REAL ACCEPT / DECLINE HANDLER
+  const handleOfferAction = async (id, action) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await fetch(`${BASE_URL}/jobseeker/offers/${id}/${action}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // 🔥 remove instantly from UI
+      setOffers((prev) => prev.filter((offer) => offer.id !== id));
+
+    } catch (err) {
+      console.error("Offer action failed:", err);
+      alert("Failed to process offer");
+    }
   };
 
   // ✅ LOGOUT
@@ -50,7 +67,7 @@ const JobseekerDashboard = () => {
     window.location.href = "/jobseeker/login";
   };
 
-  // ✅ AVAILABILITY TOGGLE
+  // ✅ AVAILABILITY
   const [available, setAvailable] = useState(true);
 
   // ✅ MENU
@@ -64,7 +81,7 @@ const JobseekerDashboard = () => {
     { label: "Logout", icon: LogOut, id: "Logout", onClick: handleLogout },
   ];
 
-  // ✅ TABLE COLUMNS
+  // ✅ TABLE
   const offerColumns = [
     { header: "Company", accessor: "company" },
     { header: "Position", accessor: "position" },
@@ -77,13 +94,14 @@ const JobseekerDashboard = () => {
         <div className="table-actions">
           <button
             className="btn-table btn-accept"
-            onClick={() => handleOfferAction(id)}
+            onClick={() => handleOfferAction(id, "accept")}
           >
             Accept
           </button>
+
           <button
             className="btn-table btn-decline"
-            onClick={() => handleOfferAction(id)}
+            onClick={() => handleOfferAction(id, "decline")}
           >
             Decline
           </button>
@@ -92,11 +110,10 @@ const JobseekerDashboard = () => {
     },
   ];
 
-  // ✅ OVERVIEW UI
+  // ✅ OVERVIEW
   const renderOverview = () => (
     <div className="dashboard-grid">
 
-      {/* EDIT PROFILE */}
       <div className="card">
         <h3>Profile Completion</h3>
         <button
@@ -107,13 +124,11 @@ const JobseekerDashboard = () => {
         </button>
       </div>
 
-      {/* OFFERS */}
       <div className="card mt-6">
         <h3>Job Offers</h3>
         <DataTable columns={offerColumns} data={offers} />
       </div>
 
-      {/* AVAILABILITY */}
       <div className="card mt-6">
         <h3>Availability</h3>
         <label>
@@ -125,6 +140,7 @@ const JobseekerDashboard = () => {
           Available for Work
         </label>
       </div>
+
     </div>
   );
 
