@@ -1,8 +1,64 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, Lock, LogIn } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { Mail, Lock, LogIn, User } from 'lucide-react';
+import { login } from '../services/api';
+import { loginSuccess } from '../features/auth/authSlice';
+
+
 
 export default function EmployerLogin() {
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    identifier: '',
+    password: ''
+  });
+
+  useEffect(() => {
+    if (user && user.role === 'employer') {
+      navigate('/employer/dashboard');
+    } else if (user && user.role === 'jobseeker') {
+      navigate('/jobseeker/dashboard');
+    }
+  }, [user, navigate]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const data = await login(formData);
+
+      // Enforce role: check user_type from backend
+      if (data.user?.user_type !== 'employer') {
+        setError('This account is not an employer account. Please use the correct login page.');
+        setLoading(false);
+        return;
+      }
+
+      dispatch(loginSuccess({
+        user: data.user,
+        token: data.access_token
+      }));
+      // alert('Login successful!');
+      navigate('/employer/dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
     <div className="grid-2">
       <div className="card">
@@ -11,23 +67,40 @@ export default function EmployerLogin() {
           <h2>Employer Login</h2>
         </div>
         <div className="card-body">
-          <form>
+          {error && <div className="alert alert-error mb-4">{error}</div>}
+          <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="form-label">Email Address</label>
+              <label className="form-label">Username / Email / Phone</label>
               <div className="input-icon-wrapper">
-                <Mail size={18} />
-                <input type="email" className="form-input" placeholder="hr@company.co.ke" />
+                <User size={18} />
+                <input
+                  type="text"
+                  name="identifier"
+                  className="form-input"
+                  placeholder="companyuser or email"
+                  value={formData.identifier}
+                  onChange={handleChange}
+                  required
+                />
               </div>
             </div>
             <div className="form-group">
               <label className="form-label">Password</label>
               <div className="input-icon-wrapper">
                 <Lock size={18} />
-                <input type="password" className="form-input" placeholder="Enter your password" />
+                <input
+                  type="password"
+                  name="password"
+                  className="form-input"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
               </div>
             </div>
-            <button type="submit" className="btn btn-primary btn-block">
-              Sign In
+            <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
             <p className="text-center mt-4 text-muted">
               Don't have an account? <Link to="/employer/register" style={{ color: 'var(--primary)' }}>Register here</Link>

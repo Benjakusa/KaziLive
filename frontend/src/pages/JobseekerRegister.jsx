@@ -1,26 +1,100 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, User, Briefcase, FileText, Upload, LogIn } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Phone, MapPin, User, Briefcase, FileText, Upload, LogIn, Lock, Camera } from 'lucide-react';
+import { register, BASE_URL } from '../services/api';
+import defaultAvatar from '../assets/default-avatar.png';
 
 export default function JobseekerRegister() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [profilePreview, setProfilePreview] = useState(null);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    username: '',
     phone: '',
     location: '',
     jobCategory: '',
     skills: '',
     expectedSalary: '',
-    cv: null
+    password: '',
+    confirmPassword: '',
+    cv: null,
+    profilePicture: null
   });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleProfilePictureChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size <= 2 * 1024 * 1024) {
+        setFormData({ ...formData, profilePicture: file });
+        const reader = new FileReader();
+        reader.onloadend = () => setProfilePreview(reader.result);
+        reader.readAsDataURL(file);
+      } else {
+        alert('Image too large. Max 2MB allowed.');
+      }
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Jobseeker registration:', formData);
+    setError('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      let profilePictureUrl = null;
+
+      // 1. Upload profile picture if exists
+      if (formData.profilePicture) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', formData.profilePicture);
+        uploadFormData.append('file_type', 'profile_picture');
+
+        const uploadResponse = await fetch(`${BASE_URL}/jobseeker/upload-public`, {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        if (uploadResponse.ok) {
+          const uploadData = await uploadResponse.json();
+          profilePictureUrl = uploadData.url;
+        } else {
+          console.error('Profile picture upload failed');
+        }
+      }
+
+      // 2. Register with profile picture URL
+      await register({
+        email: formData.email,
+        username: formData.username || formData.email.split('@')[0],
+        phone: formData.phone,
+        password: formData.password,
+        user_type: 'jobseeker',
+        full_name: formData.fullName,
+        location: formData.location,
+        job_category: formData.jobCategory,
+        skills: formData.skills,
+        expected_salary: formData.expectedSalary,
+        profile_picture: profilePictureUrl
+      });
+      alert('Registration successful! Please login.');
+      navigate('/jobseeker/login');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -31,7 +105,53 @@ export default function JobseekerRegister() {
           <h2>Jobseeker Registration</h2>
         </div>
         <div className="card-body">
+          {error && <div className="alert alert-error mb-4">{error}</div>}
           <form onSubmit={handleSubmit}>
+            <div className="form-group" style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <label className="form-label">Profile Picture</label>
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <div
+                  style={{
+                    width: '100px',
+                    height: '100px',
+                    borderRadius: '50%',
+                    background: profilePreview ? `url(${profilePreview}) center/cover` : '#e5e7eb',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto',
+                    border: '2px solid var(--primary)'
+                  }}
+                >
+                  {!profilePreview && <img src={defaultAvatar} alt="Default Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%' }} />}
+                </div>
+                <label
+                  htmlFor="profile-picture"
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    background: 'var(--primary)',
+                    borderRadius: '50%',
+                    padding: '8px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <Camera size={16} color="white" />
+                </label>
+                <input
+                  type="file"
+                  id="profile-picture"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleProfilePictureChange}
+                />
+              </div>
+              <p className="text-muted small" style={{ marginTop: '8px' }}>Optional - Max 2MB</p>
+            </div>
             <div className="form-group">
               <label className="form-label">
                 Full Name
@@ -61,6 +181,23 @@ export default function JobseekerRegister() {
                   className="form-input"
                   placeholder="john@email.co.ke"
                   value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">
+                Username
+              </label>
+              <div className="input-icon-wrapper">
+                <User size={18} />
+                <input
+                  type="text"
+                  name="username"
+                  className="form-input"
+                  placeholder="johndoe"
+                  value={formData.username}
                   onChange={handleChange}
                   required
                 />
@@ -100,6 +237,41 @@ export default function JobseekerRegister() {
                 />
               </div>
             </div>
+            <div className="form-group">
+              <label className="form-label">
+                Password
+              </label>
+              <div className="input-icon-wrapper">
+                <Lock size={18} />
+                <input
+                  type="password"
+                  name="password"
+                  className="form-input"
+                  placeholder="Create a password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">
+                Confirm Password
+              </label>
+              <div className="input-icon-wrapper">
+                <Lock size={18} />
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  className="form-input"
+                  placeholder="Confirm your password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
             <div className="form-group">
               <label className="form-label">
                 Job Category
@@ -163,14 +335,72 @@ export default function JobseekerRegister() {
               <label className="form-label">
                 Upload CV
               </label>
-              <div className="upload-dropzone">
-                <Upload size={32} />
-                <p>Drag and drop your CV here, or click to browse</p>
-                <p className="text-muted small">PDF, DOC, DOCX up to 5MB</p>
+              <input
+                type="file"
+                id="cv-upload"
+                name="cv"
+                accept=".pdf,.doc,.docx"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file && file.size <= 5 * 1024 * 1024) {
+                    setFormData({ ...formData, cv: file });
+                  } else if (file) {
+                    alert('File too large. Max 5MB allowed.');
+                  }
+                }}
+              />
+              <div
+                className={`upload-dropzone ${formData.cv ? 'has-file' : ''}`}
+                onClick={() => document.getElementById('cv-upload').click()}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.add('drag-active');
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove('drag-active');
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove('drag-active');
+                  const file = e.dataTransfer.files[0];
+                  if (file && file.size <= 5 * 1024 * 1024) {
+                    setFormData({ ...formData, cv: file });
+                  } else if (file) {
+                    alert('File too large. Max 5MB allowed.');
+                  }
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                {formData.cv ? (
+                  <>
+                    <FileText size={32} color="var(--primary)" />
+                    <p style={{ fontWeight: 600 }}>{formData.cv.name}</p>
+                    <p className="text-muted small">{(formData.cv.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ marginTop: '8px', padding: '4px 12px', fontSize: '0.8rem' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFormData({ ...formData, cv: null });
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Upload size={32} />
+                    <p>Drag and drop your CV here, or click to browse</p>
+                    <p className="text-muted small">PDF, DOC, DOCX up to 5MB</p>
+                  </>
+                )}
               </div>
             </div>
-            <button type="submit" className="btn btn-primary btn-block">
-              Create Profile
+            <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+              {loading ? 'Creating Profile...' : 'Create Profile'}
             </button>
             <p className="text-center mt-4 text-muted">
               Already have an account? <Link to="/jobseeker/login" style={{ color: 'var(--primary)' }}>Sign in</Link>

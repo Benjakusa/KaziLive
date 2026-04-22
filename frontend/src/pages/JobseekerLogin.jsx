@@ -1,24 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import { Lock, LogIn, User } from "lucide-react";
+import { login } from "../services/api";
+import { loginSuccess } from "../features/auth/authSlice";
 
 export default function JobseekerLogin() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
 
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    identifier: "",
+    password: "",
+  });
 
-  const handleLogin = (e) => {
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && user.role === "jobseeker") {
+      navigate("/jobseeker/dashboard");
+    } else if (user && user.role === "employer") {
+      navigate("/employer/dashboard");
+    }
+  }, [user, navigate]);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    if (identifier === "employer@test.com") {
-      alert("Logged in as Employer");
-      navigate("/employer");
-    } else if (identifier === "jobseeker@test.com") {
-      alert("Logged in as Jobseeker");
-      navigate("/jobseeker");
-    } else {
-      alert("Use employer@test.com or jobseeker@test.com");
+    try {
+      const data = await login(formData);
+
+      // Ensure correct role
+      if (data.user?.user_type !== "jobseeker") {
+        setError("This is not a jobseeker account.");
+        setLoading(false);
+        return;
+      }
+
+      dispatch(
+        loginSuccess({
+          user: data.user,
+          token: data.access_token,
+        })
+      );
+
+      navigate("/jobseeker/dashboard");
+    } catch (err) {
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -31,8 +72,9 @@ export default function JobseekerLogin() {
         </div>
 
         <div className="card-body">
-          <form onSubmit={handleLogin}>
-            
+          {error && <div className="alert alert-error mb-4">{error}</div>}
+
+          <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label">
                 Username / Email / Phone
@@ -42,33 +84,39 @@ export default function JobseekerLogin() {
                 <User size={18} />
                 <input
                   type="text"
+                  name="identifier"
                   className="form-input"
                   placeholder="0712 345 678 or email"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
+                  value={formData.identifier}
+                  onChange={handleChange}
+                  required
                 />
               </div>
             </div>
 
             <div className="form-group">
-              <label className="form-label">
-                Password
-              </label>
+              <label className="form-label">Password</label>
 
               <div className="input-icon-wrapper">
                 <Lock size={18} />
                 <input
                   type="password"
+                  name="password"
                   className="form-input"
                   placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
                 />
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-block">
-              Sign In
+            <button
+              type="submit"
+              className="btn btn-primary btn-block"
+              disabled={loading}
+            >
+              {loading ? "Signing In..." : "Sign In"}
             </button>
 
             <p className="text-center mt-4 text-muted">
@@ -82,7 +130,6 @@ export default function JobseekerLogin() {
             </p>
           </form>
 
-          {/* QUICK ACCESS BUTTONS */}
           <div style={{ marginTop: "20px" }}>
             <button onClick={() => navigate("/employer")}>
               Enter as Employer

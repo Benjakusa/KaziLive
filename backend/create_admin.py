@@ -7,8 +7,11 @@ with app.app_context():
     db.create_all()
     admin_email = "admin@kazilive.com"
     # Try to find user by email or username to avoid unique constraints
-    if Admin.query.filter_by(email=admin_email).first():
-        print(f"Admin with email {admin_email} already exists.")
+    admin = Admin.query.filter_by(email=admin_email).first()
+    if admin:
+        admin.password_hash = generate_password_hash("@Admin.2026.")
+        db.session.commit()
+        print(f"Admin password updated for {admin_email}")
     else:
         admin = Admin(
             email=admin_email,

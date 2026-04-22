@@ -32,8 +32,9 @@ def register():
 
     password_hash = generate_password_hash(data['password'])
 
-    token = generate_verification_token()
-    token_expiry = get_token_expiry()
+    # Bypass verification token generation
+    token = "000000" # Dummy token
+    token_expiry = datetime.utcnow()
 
     if user_type == UserType.JOBSEEKER:
         user = Jobseeker(
@@ -42,9 +43,16 @@ def register():
             phone=data['phone'],
             password_hash=password_hash,
             user_type=user_type,
-            is_active=False,
-            two_factor_token=token,
-            two_factor_expires=token_expiry,
+            is_active=True,
+            is_verified=True,
+            full_name=data.get('full_name') or data.get('fullName'),
+            location=data.get('location'),
+            job_category=data.get('job_category') or data.get('jobCategory'),
+            skills=data.get('skills', '').split(',') if data.get('skills') and isinstance(data.get('skills'), str) else data.get('skills', []),
+            expected_salary=int(str(data.get('expected_salary') or '0').replace(',', '').replace('KSh', '').strip()) if data.get('expected_salary') else 0,
+            bio=data.get('bio'),
+            availability_status=data.get('availability_status', 'available'),
+            profile_picture=data.get('profile_picture') or data.get('profilePicture')
         )
     elif user_type == UserType.EMPLOYER:
         user = Employer(
@@ -53,10 +61,12 @@ def register():
             phone=data['phone'],
             password_hash=password_hash,
             user_type=user_type,
-            is_active=False,
-            two_factor_token=token,
-            two_factor_expires=token_expiry,
-            company_name=data.get('company_name', ''),
+            is_active=True,
+            is_verified=True,
+            company_name=data.get('company_name') or data.get('companyName', ''),
+            company_location=data.get('location') or data.get('companyLocation', ''),
+            company_description=data.get('company_description') or data.get('companyDescription', ''),
+            company_logo=data.get('company_logo') or data.get('companyLogo')
         )
     elif user_type == UserType.ADMIN:
         user = Admin(
@@ -65,18 +75,19 @@ def register():
             phone=data['phone'],
             password_hash=password_hash,
             user_type=user_type,
-            is_active=False,
-            two_factor_token=token,
-            two_factor_expires=token_expiry,
+            is_active=True,
+            is_verified=True,
         )
 
     db.session.add(user)
     db.session.commit()
+    print(f"DEBUG: Saved user {user.username} with is_active={user.is_active}, is_verified={user.is_verified}")
 
-    send_verification_email(user.email, token)
+    # Explicitly NOT sending verification email as per user request
+    # send_verification_email(user.email, token)
 
     return jsonify({
-        'message': 'Registration successful. Check your email for the verification token.',
+        'message': 'Registration successful. You can now login.',
         'user': {
             'id': user.id,
             'email': user.email,
@@ -143,17 +154,27 @@ def login():
     if not identifier or not password:
         return jsonify({'error': 'identifier and password are required'}), 400
 
+    print(f"LOGIN ATTEMPT: {identifier}")
     user = (
         User.query.filter_by(email=identifier).first() or
         User.query.filter_by(username=identifier).first() or
         User.query.filter_by(phone=identifier).first()
     )
 
-    if not user or not check_password_hash(user.password_hash, password):
+    if not user:
+        print(f"LOGIN FAILED: User not found for {identifier}")
+        return jsonify({'error': 'Invalid credentials'}), 401
+    
+    if not check_password_hash(user.password_hash, password):
+        print(f"LOGIN FAILED: Password mismatch for {identifier}")
         return jsonify({'error': 'Invalid credentials'}), 401
 
-    if not user.is_active:
-        return jsonify({'error': 'Account not verified. Check your email for the verification token.'}), 403
+    # Bypassing is_active check to allow access without email verification
+    print(f"DEBUG: User status for {identifier}: is_active={user.is_active} (Bypassing check)")
+    
+    print(f"LOGIN SUCCESS for {identifier}")
+    user.is_active = True # Force active status just in case
+    db.session.commit()
 
     access_token = create_access_token(
         identity=str(user.id),

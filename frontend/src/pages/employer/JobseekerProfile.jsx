@@ -1,33 +1,103 @@
-import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
-function JobseekerProfile() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+// 🌐 BASE URL
+export const BASE_URL = "https://kazilive-backend.onrender.com";
 
-  const jobseekers = [
-    { id: "1", name: "John Doe", jobCategory: "Frontend Developer", salary: "500 USD", availability: "Available" },
-    { id: "2", name: "Jane Smith", jobCategory: "Backend Developer", salary: "700 USD", availability: "Not Available" },
-    { id: "3", name: "Mike Johnson", jobCategory: "UI/UX Designer", salary: "600 USD", availability: "Available" },
-  ];
+// ⚙️ Axios instance
+const API = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-  const user = jobseekers.find((js) => js.id === id);
+// ===============================
+// 🔐 AUTH
+// ===============================
 
-  if (!user) {
-    return <h3>Profile not found</h3>;
+export const register = async (userData) => {
+  try {
+    const res = await API.post("/api/auth/register", userData);
+    return res.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Registration failed" };
   }
+};
 
-  return (
-    <div>
-      <button onClick={() => navigate("/employer")}>
-        Back
-      </button>
+export const login = async (credentials) => {
+  try {
+    const res = await API.post("/api/auth/login", credentials);
+    return res.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Login failed" };
+  }
+};
 
-      <h2>{user.name}</h2>
-      <p>{user.jobCategory}</p>
-      <p>{user.salary}</p>
-      <p>{user.availability}</p>
-    </div>
-  );
-}
+// ===============================
+// 👤 PROFILE
+// ===============================
 
-export default JobseekerProfile; 
+export const getProfile = async () => {
+  const token = localStorage.getItem("token");
+
+  const res = await API.get("/api/users/profile", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+};
+
+export const fetchProfile = getProfile;
+
+// ===============================
+// ✏️ UPDATE PROFILE
+// ===============================
+
+export const updateProfile = async (data) => {
+  const token = localStorage.getItem("token");
+
+  const res = await API.put("/api/users/profile", data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
+};
+
+// ===============================
+// 📤 GENERIC FILE UPLOAD (FIXED)
+// ===============================
+
+export const uploadFile = async (file, fileType = "general") => {
+  const token = localStorage.getItem("token");
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("file_type", fileType);
+
+  const res = await API.post("/jobseeker/upload-public", formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+};
+
+// ===============================
+// 🏢 COMPANY LOGO (alias for backward compatibility)
+// ===============================
+
+export const uploadCompanyLogo = (file) => {
+  return uploadFile(file, "company_logo");
+};
+
+// ===============================
+// EXPORT AXIOS INSTANCE
+// ===============================
+
+export default API;

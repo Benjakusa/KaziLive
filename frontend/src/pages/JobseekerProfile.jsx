@@ -1,83 +1,198 @@
-import React from 'react';
-import { User, Briefcase, Mail, Phone, MapPin, FileText, Upload, Save } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { getProfile, updateProfile, uploadFile } from "../services/api";
 
-export default function JobseekerProfile() {
+export default function JobseekerProfileView() {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    phone: "",
+    location: "",
+  });
+
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+
+  // ===============================
+  // 📥 LOAD PROFILE
+  // ===============================
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await getProfile();
+
+        // prevent null crashes
+        const safeData = data || {};
+
+        setProfile(safeData);
+
+        setFormData({
+          username: safeData.username || "",
+          email: safeData.email || "",
+          phone: safeData.phone || "",
+          location: safeData.location || "",
+        });
+      } catch (err) {
+        setError(err?.message || "Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  // ===============================
+  // ✏️ HANDLE INPUT
+  // ===============================
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  // ===============================
+  // 📤 IMAGE PREVIEW
+  // ===============================
+  const handleFileChange = (e) => {
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+
+    setFile(selected);
+
+    const reader = new FileReader();
+    reader.onloadend = () => setPreview(reader.result);
+    reader.readAsDataURL(selected);
+  };
+
+  // ===============================
+  // 💾 SAVE PROFILE
+  // ===============================
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+
+    try {
+      let uploadedUrl = profile?.avatar || "";
+
+      // upload image if selected
+      if (file) {
+        const uploadRes = await uploadFile(file);
+        uploadedUrl = uploadRes?.url || uploadedUrl;
+      }
+
+      const payload = {
+        ...formData,
+        avatar: uploadedUrl,
+      };
+
+      const updated = await updateProfile(payload);
+
+      const safeUpdated = updated || payload;
+
+      setProfile(safeUpdated);
+
+      // IMPORTANT: sync UI immediately
+      setFormData({
+        username: safeUpdated.username || "",
+        email: safeUpdated.email || "",
+        phone: safeUpdated.phone || "",
+        location: safeUpdated.location || "",
+      });
+
+      alert("Profile updated successfully!");
+    } catch (err) {
+      setError(err?.message || "Update failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ===============================
+  // LOADING STATE
+  // ===============================
+  if (loading) {
+    return (
+      <div className="card">
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="card">
-      <div className="card-header">
-        <User size={24} />
-        <h2>My Profile</h2>
+      <h2>My Profile</h2>
+
+      {/* ERROR */}
+      {error && (
+        <p style={{ color: "red", marginBottom: 10 }}>
+          {error}
+        </p>
+      )}
+
+      {/* AVATAR */}
+      <div style={{ marginBottom: 20 }}>
+        <img
+          src={
+            preview ||
+            profile?.avatar ||
+            "https://via.placeholder.com/100"
+          }
+          alt="avatar"
+          style={{
+            width: 100,
+            height: 100,
+            borderRadius: "50%",
+            objectFit: "cover",
+          }}
+        />
       </div>
-      <div className="card-body">
-        <div className="flex-center-gap" style={{ marginBottom: '32px' }}>
-          <div className="avatar" style={{ width: '80px', height: '80px', fontSize: '2rem' }}>NM</div>
-          <div>
-            <h3 style={{ marginBottom: '4px' }}>Job Seeker</h3>
-            <p className="text-muted">Update your profile to get noticed</p>
-          </div>
-        </div>
 
-        <div className="grid-2">
-          <div className="form-group">
-            <label className="form-label">Full Name</label>
-            <div className="input-icon-wrapper">
-              <User size={18} />
-              <input type="text" className="form-input" placeholder="Njeri Muthoni" />
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Email</label>
-            <div className="input-icon-wrapper">
-              <Mail size={18} />
-              <input type="email" className="form-input" placeholder="njeri@email.co.ke" />
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Phone (M-Pesa)</label>
-            <div className="input-icon-wrapper">
-              <Phone size={18} />
-              <input type="tel" className="form-input" placeholder="0712 345 678" />
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Location</label>
-            <div className="input-icon-wrapper">
-              <MapPin size={18} />
-              <input type="text" className="form-input" placeholder="Westlands, Nairobi" />
-            </div>
-          </div>
-        </div>
+      <input type="file" accept="image/*" onChange={handleFileChange} />
 
-        <div className="form-group">
-          <label className="form-label">Skills</label>
-          <div className="input-icon-wrapper">
-            <Briefcase size={18} />
-            <input type="text" className="form-input" placeholder="React, Python, SQL, Django..." />
-          </div>
-        </div>
+      {/* FORM */}
+      <form onSubmit={handleSubmit}>
+        <input
+          name="username"
+          placeholder="Username"
+          value={formData.username}
+          onChange={handleChange}
+        />
 
-        <div className="form-group">
-          <label className="form-label">Expected Salary (KSh)</label>
-          <div className="input-icon-wrapper">
-            <FileText size={18} />
-            <input type="text" className="form-input" placeholder="120,000" />
-          </div>
-        </div>
+        <input
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+        />
 
-        <div className="form-group">
-          <label className="form-label">Upload CV</label>
-          <div className="upload-dropzone">
-            <Upload size={32} />
-            <p>Drag and drop your CV here, or click to browse</p>
-            <p className="text-muted small">PDF, DOC, DOCX up to 5MB</p>
-          </div>
-        </div>
+        <input
+          name="phone"
+          placeholder="Phone"
+          value={formData.phone}
+          onChange={handleChange}
+        />
 
-        <button className="btn btn-primary">
-          <Save size={18} />
-          Save Profile
+        <input
+          name="location"
+          placeholder="Location"
+          value={formData.location}
+          onChange={handleChange}
+        />
+
+        <button type="submit" disabled={saving}>
+          {saving ? "Saving..." : "Update Profile"}
         </button>
-      </div>
+      </form>
     </div>
   );
-}
+} 

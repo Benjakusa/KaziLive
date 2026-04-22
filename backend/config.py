@@ -11,6 +11,8 @@ class Config:
     # Security
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production')
+    from datetime import timedelta
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
     
     # Environment
     DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'

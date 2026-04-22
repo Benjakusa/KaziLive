@@ -17,23 +17,29 @@ function AdminLogin() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('https://kazilive-backend.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Login failed');
+      let data;
+      try {
+        const text = await res.text();
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = {};
       }
 
-      if (data.user.user_type !== 'admin') {
+      if (!res.ok) {
+        throw new Error(data.error || `Login failed (${res.status})`);
+      }
+
+      if (data.user?.user_type !== 'admin') {
         throw new Error('Access denied. Admin only.');
       }
 
-      dispatch(loginSuccess(data));
+      dispatch(loginSuccess({ user: data.user, token: data.access_token }));
       navigate('/admin/dashboard');
     } catch (err) {
       setError(err.message);
