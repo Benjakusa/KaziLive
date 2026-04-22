@@ -92,10 +92,10 @@ const EmployerDashboard = () => {
   const renderOverview = () => (
     <div className="dashboard-grid">
       <div className="stats-row">
-        <StatCard title="Credit Balance" value="450" icon={CreditCard} color="maroon" />
+        <StatCard title="Credit Balance" value="450" icon={CreditCard} />
         <StatCard title="Profiles Viewed" value="28" icon={Users} trend="up" trendValue="15" />
         <StatCard title="Saved Talent" value="12" icon={Heart} />
-        <StatCard title="Response Rate" value="94%" icon={TrendingUp} color="maroon" />
+        <StatCard title="Response Rate" value="94%" icon={TrendingUp} />
       </div>
 
       <div className="dashboard-main-grid">
@@ -107,8 +107,8 @@ const EmployerDashboard = () => {
             </div>
             <div className="search-box-large mt-4">
               <Search size={24} className="search-icon-large" />
-              <input type="text" placeholder="Search by skills, title, or location..." />
-              <button className="btn-maroon">Search</button>
+              <input type="text" className="form-input" placeholder="Search by skills, title, or location..." />
+              <button className="btn-primary">Search</button>
             </div>
             <div className="tag-group mt-4">
               <span className="search-tag">React.js</span>
@@ -121,7 +121,7 @@ const EmployerDashboard = () => {
           <div className="card mt-6">
             <div className="card-header-flex">
               <h3>Profile View Analytics</h3>
-              <Badge variant="maroon">This Week</Badge>
+              <Badge variant="primary">This Week</Badge>
             </div>
             <div className="mt-4">
               <Chart type="bar" data={chartData} xKey="name" yKey="views" />

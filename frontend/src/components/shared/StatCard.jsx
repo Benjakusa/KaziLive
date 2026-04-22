@@ -1,21 +1,20 @@
 import React from 'react';
 
-const StatCard = ({ title, value, icon: Icon, trend, trendValue, color = 'maroon' }) => {
+const StatCard = ({ title, value, icon: Icon, trend, trendValue }) => {
     return (
-        <div className={`stat-card-custom border-${color}`}>
-            <div className="stat-card-header">
-                <div className={`stat-icon-wrapper bg-${color}-light`}>
-                    <Icon size={24} className={`text-${color}`} />
-                </div>
+        <div className="stat-card">
+            <div className="stat-info">
+                <h4>{title}</h4>
+                <div className="stat-value">{value}</div>
                 {trend && (
-                    <span className={`stat-trend ${trend === 'up' ? 'text-success' : 'text-danger'}`}>
+                    <div className={`mt-2 text-sm font-medium ${trend === 'up' ? 'text-success' : 'text-danger'}`} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         {trend === 'up' ? '↑' : '↓'} {trendValue}%
-                    </span>
+                        <span className="text-secondary font-normal ml-1">vs last month</span>
+                    </div>
                 )}
             </div>
-            <div className="stat-card-body">
-                <h3 className="stat-value">{value}</h3>
-                <p className="stat-label">{title}</p>
+            <div className="stat-icon-wrapper">
+                <Icon size={24} />
             </div>
         </div>
     );

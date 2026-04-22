@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { AlertCircle } from 'lucide-react';
+import Badge from '../components/shared/Badge';
 
 import {
   Users,
@@ -21,29 +21,12 @@ import {
   DollarSign,
   Clock,
   Smartphone,
-  Globe,
-  Database,
   Mail,
-  Lock,
   Phone,
   ChevronRight,
-  Play,
   Zap,
-  Award,
-  BarChart3,
-  FileCheck,
   Target,
-  Sparkles,
 } from 'lucide-react';
-
-const featuredTalents = [
-  { id: 1, name: 'Amina Ochieng', role: 'Senior Software Engineer', skills: ['React', 'Node.js', 'Python', 'AWS'], experience: '5 years', location: 'Nairobi', verified: true, salary: 'KES 150K', availability: 'Immediate' },
-  { id: 2, name: 'David Mwangi', role: 'Lead UX Designer', skills: ['Figma', 'UI/UX', 'Research', 'Prototyping'], experience: '4 years', location: 'Kisumu', verified: true, salary: 'KES 120K', availability: '2 weeks' },
-  { id: 3, name: 'Grace Njoroge', role: 'Senior Data Analyst', skills: ['SQL', 'Python', 'Tableau', 'Power BI'], experience: '3 years', location: 'Nairobi', verified: true, salary: 'KES 130K', availability: 'Immediate' },
-  { id: 4, name: 'James Kiprotich', role: 'Marketing Director', skills: ['SEO', 'Content Strategy', 'Social Media', 'Analytics'], experience: '7 years', location: 'Mombasa', verified: true, salary: 'KES 200K', availability: '1 month' },
-  { id: 5, name: 'Mary Wanjiku', role: 'DevOps Engineer', skills: ['Docker', 'Kubernetes', 'Jenkins', 'Terraform'], experience: '4 years', location: 'Nairobi', verified: true, salary: 'KES 180K', availability: 'Immediate' },
-  { id: 6, name: 'Peter Otieno', role: 'Product Manager', skills: ['Agile', 'Scrum', 'Product Strategy', 'Roadmapping'], experience: '6 years', location: 'Nairobi', verified: true, salary: 'KES 220K', availability: '3 weeks' },
-];
 
 const testimonials = [
   { id: 1, name: 'Sarah Kimani', role: 'HR Manager at TechCorp', content: 'KaziLive saved us countless hours. Instead of reviewing 500+ applications, we found our ideal candidate in just 2 days!', rating: 5, image: 'https://randomuser.me/api/portraits/women/1.jpg' },
@@ -61,330 +44,184 @@ const stats = [
 function Home() {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [showAccessAlert, setShowAccessAlert] = useState(false);
-  const categories = ['All', 'Technology', 'Design', 'Marketing', 'Sales', 'Operations'];
 
   const handleStartHiring = () => {
-    if (user && user.role === 'employer') {
-      navigate('/employer/dashboard');
-    } else if (user && user.role === 'jobseeker') {
-      navigate('/jobseeker/dashboard');
-    } else {
-      navigate('/employer/register');
-    }
+    if (user && user.role === 'employer') navigate('/employer/dashboard');
+    else if (user && user.role === 'jobseeker') navigate('/jobseeker/dashboard');
+    else navigate('/employer/register');
   };
 
   const handleJoinJobseeker = () => {
-    if (user && user.role === 'jobseeker') {
-      navigate('/jobseeker/dashboard');
-    } else if (user && user.role === 'employer') {
-      navigate('/employer/dashboard');
-    } else {
-      navigate('/jobseeker/register');
-    }
+    if (user && user.role === 'jobseeker') navigate('/jobseeker/dashboard');
+    else if (user && user.role === 'employer') navigate('/employer/dashboard');
+    else navigate('/jobseeker/register');
   };
-
-  const handleViewTalent = (e) => {
-    e.preventDefault();
-    if (user && user.role === 'employer') {
-      navigate('/employer/search');
-    } else if (user && user.role === 'jobseeker') {
-      setShowAccessAlert(true);
-    } else {
-      navigate('/employer/login');
-    }
-  };
-
-  const filteredTalents = selectedCategory === 'All'
-    ? featuredTalents
-    : featuredTalents.filter(talent =>
-      talent.role.toLowerCase().includes(selectedCategory.toLowerCase()) ||
-      talent.skills.some(skill => skill.toLowerCase().includes(selectedCategory.toLowerCase()))
-    );
-
 
   return (
     <div className="home-page">
 
-      {/* Hero Section */}
+      {/* ── HERO ── */}
       <section className="hero-section">
-        <div className="hero-overlay"></div>
-        <div className="hero-background"></div>
-        <div className="hero-container">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <Sparkles size={16} />
-              <span>Private Hiring Platform for Kenyan Companies</span>
-            </div>
-            <h1 className="hero-title">
-              Find Verified Talent<br />
-              <span className="yellow-text">Without the Public Headaches</span>
-            </h1>
-            <p className="hero-subtitle">
-              Join 2,500+ Kenyan companies who've discovered the smarter way to hire.
-              Browse pre-verified professional profiles and contact candidates directly.
-              No public postings, no application floods, just quality matches.
-            </p>
-            <div className="hero-buttons">
-              <button onClick={handleStartHiring} className="btn-primary" style={{ border: 'none', cursor: 'pointer' }}>
-                Start Hiring Now
-                <ArrowRight size={18} />
-              </button>
-              <button onClick={handleJoinJobseeker} className="btn-secondary" style={{ border: 'none', cursor: 'pointer' }}>
-                <UserCheck size={18} />
-                Join as Job Seeker
-              </button>
-            </div>
-
-
-            <div className="trust-badge">
-              <div className="trust-icons">
-                <Shield size={14} />
-                <CheckCircle size={14} />
-                <Lock size={14} />
-              </div>
-              <span>Trusted by Kenya's leading companies • 100% verified profiles</span>
-            </div>
+        <div className="hero-overlay" />
+        <div className="hero-noise" />
+        <div className="section-container hero-container">
+          <div className="hero-tag">Kenya&apos;s Premier Talent Platform</div>
+          <h1 className="hero-title">
+            The Smarter Way to<br />
+            <span className="hero-accent">Hire in Kenya</span>
+          </h1>
+          <p className="hero-subtitle">
+            Direct access to pre-verified professional talent.<br />
+            No public noise. No application floods. Just quality matches.
+          </p>
+          <div className="hero-buttons">
+            <button onClick={handleStartHiring} className="btn-primary-hero">
+              Hire Verified Talent
+              <ArrowRight size={18} />
+            </button>
+            <button onClick={handleJoinJobseeker} className="btn-glass-hero">
+              Join as Job Seeker
+            </button>
           </div>
-          <div className="hero-visual">
-            <div className="stats-card">
-              <div className="stat-item">
-                <Users size={20} className="yellow-icon" />
-                <div>
-                  <strong>2,500+</strong>
-                  <span>Active Employers</span>
-                </div>
+
+          {/* Stats strip */}
+          <div className="hero-stats">
+            {stats.map((s, i) => (
+              <div key={i} className="hero-stat-item">
+                <span className="hero-stat-number">{s.number}</span>
+                <span className="hero-stat-label">{s.label}</span>
               </div>
-              <div className="stat-divider"></div>
-              <div className="stat-item">
-                <UserCheck size={20} className="yellow-icon" />
-                <div>
-                  <strong>10,000+</strong>
-                  <span>Verified Professionals</span>
-                </div>
-              </div>
-            </div>
-            <div className="talent-preview">
-              <div className="preview-header">
-                <Eye size={16} />
-                <span>Recently Verified Talent</span>
-              </div>
-              {featuredTalents.slice(0, 3).map((talent, idx) => (
-                <div key={talent.id} className={`talent-card ${idx === 0 ? 'featured' : ''}`}>
-                  <div className="talent-avatar">{talent.name.charAt(0)}{talent.name.split(' ')[1]?.charAt(0)}</div>
-                  <div className="talent-details">
-                    <div className="talent-name">
-                      {talent.name}
-                      <CheckCircle size={14} className="verified-badge" />
-                    </div>
-                    <div className="talent-role">{talent.role}</div>
-                    <div className="talent-meta">
-                      <span><MapPin size={12} /> {talent.location}</span>
-                      <span><Briefcase size={12} /> {talent.experience}</span>
-                    </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PROBLEM / SOLUTION ── */}
+      <section className="problem-section">
+        <div className="section-container">
+          <div className="section-header">
+            <span className="section-tag">The Problem We Solve</span>
+            <h2>Public job posts are broken</h2>
+            <p>Traditional hiring methods waste time and resources. KaziLive offers a smarter way.</p>
+          </div>
+          <div className="ps-grid">
+            <div className="ps-card problem-card">
+              <h3 className="ps-card-title">The Old Way</h3>
+              {[
+                { title: '500+ applications per role', desc: 'HR teams waste weeks filtering unqualified candidates and spam.' },
+                { title: 'Privacy concerns', desc: 'Executive roles often need discreet hiring without public exposure.' },
+                { title: 'Months to hire', desc: 'Lost productivity while positions remain empty for 60+ days.' },
+              ].map((item, i) => (
+                <div key={i} className="ps-item problem-item">
+                  <div className="ps-dot problem-dot" />
+                  <div>
+                    <h4>{item.title}</h4>
+                    <p>{item.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
 
-
-      {/* Problem/Solution Section */}
-      <section className="problem-section">
-        <div className="section-container">
-          <div className="problem-grid">
-            <div className="problem-content">
-              <span className="section-tag">The Problem We Solve</span>
-              <h2>Public job posts are broken</h2>
-              <div className="problem-list">
-                <div className="problem-item">
-                  <div className="problem-icon">😫</div>
-                  <div>
-                    <h4>500+ applications per role</h4>
-                    <p>HR teams waste weeks filtering unqualified candidates</p>
-                  </div>
+            <div className="ps-card solution-card">
+              <h3 className="ps-card-title">The KaziLive Way</h3>
+              {[
+                'Pre-verified professional profiles only',
+                'Direct contact with candidates',
+                'Focus on quality, not quantity',
+                'Fill roles in days, not months',
+              ].map((feat, i) => (
+                <div key={i} className="ps-item solution-item">
+                  <CheckCircle size={20} className="check-icon" />
+                  <span>{feat}</span>
                 </div>
-                <div className="problem-item">
-                  <div className="problem-icon">🔒</div>
-                  <div>
-                    <h4>Privacy concerns for executive roles</h4>
-                    <p>Companies don't want to advertise "we need help"</p>
-                  </div>
-                </div>
-                <div className="problem-item">
-                  <div className="problem-icon">⏰</div>
-                  <div>
-                    <h4>2-3 months average hiring time</h4>
-                    <p>Lost productivity and revenue from empty positions</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="solution-content">
-              <span className="section-tag maroon-tag">Our Solution</span>
-              <h2>Browse. Verify. Connect.</h2>
-              <p>KaziLive flips the traditional hiring model. Instead of jobs finding candidates, employers find verified professionals ready to work.</p>
-              <div className="solution-features">
-                <div><CheckCircle size={18} className="yellow-text" /> Pre-verified profiles only</div>
-                <div><CheckCircle size={18} className="yellow-text" /> Direct employer access</div>
-                <div><CheckCircle size={18} className="yellow-text" /> Pay only to browse talent</div>
-                <div><CheckCircle size={18} className="yellow-text" /> No public job postings</div>
-              </div>
+              ))}
+              <button onClick={handleStartHiring} className="btn-primary-block">
+                Get Started
+                <ArrowRight size={16} />
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* ── FEATURES ── */}
       <section id="features" className="features-section">
         <div className="section-container">
-          <div className="section-header text-center">
+          <div className="section-header">
             <span className="section-tag">Platform Features</span>
             <h2>Everything you need to hire smarter</h2>
-            <p>Built specifically for Kenyan companies and professionals</p>
+            <p>Built specifically for Kenyan companies and professionals who value quality.</p>
           </div>
           <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon"><Shield size={28} /></div>
-              <h3>Verified Profiles Only</h3>
-              <p>Every job seeker undergoes verification before appearing in search results. No fake profiles, no wasted time.</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon"><Search size={28} /></div>
-              <h3>Advanced Search Filters</h3>
-              <p>Filter by skills, experience, salary expectations, location, availability, and job category.</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon"><MessageSquare size={28} /></div>
-              <h3>Direct Contact</h3>
-              <p>View contact details and reach out immediately. No middlemen, no waiting periods.</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon"><CreditCard size={28} /></div>
-              <h3>M-Pesa Integration</h3>
-              <p>Secure payments via Safaricom Daraja API. Pay as you browse with M-Pesa.</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon"><TrendingUp size={28} /></div>
-              <h3>Profile Promotion</h3>
-              <p>Job seekers can boost their visibility to top employers for faster matches.</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon"><Bell size={28} /></div>
-              <h3>Instant Notifications</h3>
-              <p>Email and push notifications for profile views, messages, and offers.</p>
-            </div>
+            {[
+              { icon: Shield, title: 'Verified Only', desc: 'Every professional undergoes rigorous verification before appearing in search results.' },
+              { icon: Search, title: 'Precision Search', desc: 'Filter by skills, experience, salary expectations, and real-time availability.' },
+              { icon: MessageSquare, title: 'Direct Access', desc: 'Connect immediately via phone, email, or message — no intermediaries.' },
+              { icon: CreditCard, title: 'M-Pesa Payments', desc: 'Seamless pay-as-you-go access via Safaricom M-Pesa. Fast and secure.' },
+              { icon: TrendingUp, title: 'Profile Boosts', desc: 'Candidates can enhance their visibility to land their dream role faster.' },
+              { icon: Bell, title: 'Smart Alerts', desc: 'Instant notifications for new matches, profile views, and direct offers.' },
+            ].map(({ icon: Icon, title, desc }, i) => (
+              <div key={i} className="feature-card">
+                <div className="feature-icon-wrap">
+                  <Icon size={26} />
+                </div>
+                <h3>{title}</h3>
+                <p>{desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      
-
-      {/* How It Works */}
-      <section id="how-it-works" className="how-it-works">
+      {/* ── HOW IT WORKS ── */}
+      <section id="how-it-works" className="how-section">
         <div className="section-container">
-          <div className="section-header text-center">
+          <div className="section-header">
             <span className="section-tag">Simple Process</span>
             <h2>How KaziLive Works</h2>
-            <p>Get started in minutes</p>
+            <p>Get started in four simple steps and hire with confidence.</p>
           </div>
           <div className="steps-grid">
-            <div className="step-card">
-              <div className="step-number">01</div>
-              <div className="step-icon"><UserCheck size={32} /></div>
-              <h3>Create Profile</h3>
-              <p>Job seekers upload CVs and create detailed profiles showcasing skills and experience</p>
-            </div>
-            <div className="step-card">
-              <div className="step-number">02</div>
-              <div className="step-icon"><Shield size={32} /></div>
-              <h3>Verification</h3>
-              <p>Our team reviews and verifies all profiles for authenticity and quality</p>
-            </div>
-            <div className="step-card">
-              <div className="step-number">03</div>
-              <div className="step-icon"><CreditCard size={32} /></div>
-              <h3>Employer Payment</h3>
-              <p>Employers pay a fee via M-Pesa to access verified profiles</p>
-            </div>
-            <div className="step-card">
-              <div className="step-number">04</div>
-              <div className="step-icon"><MessageSquare size={32} /></div>
-              <h3>Connect & Hire</h3>
-              <p>Direct contact or job offers. No middlemen, just real connections</p>
-            </div>
+            {[
+              { num: '01', icon: UserCheck, title: 'Create Profile', desc: 'Job seekers build detailed profiles showcasing their verified skills and professional history.' },
+              { num: '02', icon: Shield, title: 'Verification', desc: 'Our team manually reviews every profile to ensure authenticity and professional quality.' },
+              { num: '03', icon: CreditCard, title: 'Browse & Access', desc: 'Employers browse the verified talent pool and pay a small fee for full profile access.' },
+              { num: '04', icon: MessageSquare, title: 'Hire Directly', desc: 'Connect directly with candidates. No middlemen, no commissions — just successful hires.' },
+            ].map(({ num, icon: Icon, title, desc }, i) => (
+              <div key={i} className="step-card">
+                <div className="step-num">{num}</div>
+                <div className="step-icon-wrap">
+                  <Icon size={30} />
+                </div>
+                <h3>{title}</h3>
+                <p>{desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="pricing-section">
-        <div className="section-container">
-          <div className="section-header text-center">
-            <span className="section-tag">Simple Pricing</span>
-            <h2>Pay only for what you need</h2>
-            <p>No subscriptions, no hidden fees</p>
-          </div>
-          <div className="pricing-grid">
-            <div className="pricing-card">
-              <div className="pricing-badge">For Job Seekers</div>
-              <div className="pricing-price">Free</div>
-              <div className="pricing-duration">Forever</div>
-              <ul className="pricing-features">
-                <li><CheckCircle size={16} className="maroon-check" /> Create professional profile</li>
-                <li><CheckCircle size={16} className="maroon-check" /> Upload CV and documents</li>
-                <li><CheckCircle size={16} className="maroon-check" /> Get verified status</li>
-                <li><CheckCircle size={16} className="maroon-check" /> Receive employer offers</li>
-                <li><CheckCircle size={16} className="maroon-check" /> Email notifications</li>
-              </ul>
-              <Link to="/jobseeker/register" className="btn-secondary full-width">
-                Join as Job Seeker
-              </Link>
-            </div>
-            <div className="pricing-card featured">
-              <div className="pricing-badge maroon-badge">For Employers</div>
-              <div className="pricing-price">KES 500</div>
-              <div className="pricing-duration">per 30-day access</div>
-              <ul className="pricing-features">
-                <li><CheckCircle size={16} className="maroon-check" /> Browse all verified profiles</li>
-                <li><CheckCircle size={16} className="maroon-check" /> Advanced search filters</li>
-                <li><CheckCircle size={16} className="maroon-check" /> View contact details</li>
-                <li><CheckCircle size={16} className="maroon-check" /> Direct messaging</li>
-                <li><CheckCircle size={16} className="maroon-check" /> Pay via M-Pesa</li>
-              </ul>
-              <Link to="/employer/register" className="btn-primary full-width">
-                Start Hiring
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
+      {/* ── TESTIMONIALS ── */}
       <section className="testimonials-section">
         <div className="section-container">
-          <div className="section-header text-center">
+          <div className="section-header">
             <span className="section-tag">Trusted by Kenyan Companies</span>
             <h2>What our users say</h2>
           </div>
           <div className="testimonials-grid">
-            {testimonials.map(testimonial => (
-              <div key={testimonial.id} className="testimonial-card">
+            {testimonials.map(t => (
+              <div key={t.id} className="testimonial-card">
                 <div className="testimonial-stars">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} size={16} fill="#800020" color="#800020" />
+                  {[...Array(t.rating)].map((_, i) => (
+                    <Star key={i} size={14} fill="#E05C1A" color="#E05C1A" />
                   ))}
                 </div>
-                <p className="testimonial-content">"{testimonial.content}"</p>
+                <p className="testimonial-content">&ldquo;{t.content}&rdquo;</p>
                 <div className="testimonial-author">
-                  <img src={testimonial.image} alt={testimonial.name} />
+                  <img src={t.image} alt={t.name} className="author-img" />
                   <div>
-                    <strong>{testimonial.name}</strong>
-                    <span>{testimonial.role}</span>
+                    <div className="author-name">{t.name}</div>
+                    <div className="author-role">{t.role}</div>
                   </div>
                 </div>
               </div>
@@ -393,33 +230,36 @@ function Home() {
         </div>
       </section>
 
-      {/* Mobile Apps Section */}
+      {/* ── MOBILE APPS ── */}
       <section className="apps-section">
-        <div className="section-container">
-          <div className="apps-content">
-            <div>
-              <span className="section-tag white-tag">Coming Soon</span>
-              <h2>Mobile Apps for <span className="yellow-text">Android</span></h2>
-              <p>Access KaziLive on the go. Get instant notifications when employers view your profile or send offers.</p>
-              <div className="app-buttons">
-                <button className="app-store-btn">
-                  <Smartphone size={20} />
-                  <span>Get on Google Play</span>
-                </button>
+        <div className="section-container apps-content">
+          <div className="apps-text">
+            <span className="section-tag">Coming Soon</span>
+            <h2>Mobile Apps for <span className="apps-accent">Professionals</span></h2>
+            <p>Take KaziLive with you. Get instant notifications when employers view your profile, send messages, or extend offers.</p>
+            <button className="app-store-btn">
+              <Smartphone size={20} />
+              <span>Get on Google Play</span>
+            </button>
+          </div>
+          <div className="phone-mockup">
+            <div className="mockup-screen">
+              <div className="mockup-header">
+                <Briefcase size={16} className="mo-accent" />
+                <span>KaziLive</span>
               </div>
-            </div>
-            <div className="phone-mockup">
-              <div className="mockup-screen">
-                <div className="mockup-header">
-                  <Briefcase size={16} className="maroon-text" />
-                  <span>KaziLive</span>
+              <div className="mockup-notif">
+                <Bell size={12} className="mo-accent" />
+                <div>
+                  <strong>New profile view!</strong>
+                  <small>TechCorp viewed your profile</small>
                 </div>
-                <div className="mockup-notification">
-                  <Bell size={12} />
-                  <div>
-                    <strong>New profile view!</strong>
-                    <small>TechCorp viewed your profile</small>
-                  </div>
+              </div>
+              <div className="mockup-notif">
+                <Mail size={12} className="mo-accent" />
+                <div>
+                  <strong>Direct offer received</strong>
+                  <small>Innovate Labs sent you an offer</small>
                 </div>
               </div>
             </div>
@@ -427,46 +267,25 @@ function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="cta-section">
-        <div className="section-container">
-          <div className="cta-content">
-            <h2>Ready to find your next hire?</h2>
-            <p>Join hundreds of Kenyan companies already using KaziLive</p>
-            <div className="cta-buttons">
-              <button onClick={handleStartHiring} className="btn-primary large" style={{ border: 'none', cursor: 'pointer' }}>
-                Get Started as Employer
-                <ArrowRight size={18} />
-              </button>
-              <button onClick={handleJoinJobseeker} className="btn-outline-light large" style={{ border: 'none', cursor: 'pointer' }}>
-                Join as Job Seeker
-              </button>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
+      {/* ── FOOTER ── */}
       <footer className="footer">
         <div className="section-container">
           <div className="footer-grid">
             <div className="footer-brand">
-              <div className="logo">
-                <Briefcase size={28} className="yellow-text" />
+              <div className="footer-logo">
+                <Briefcase size={26} className="footer-logo-icon" />
                 <span>KaziLive</span>
               </div>
               <p>The smarter way to hire in Kenya. Browse verified talent, connect directly, and fill positions faster.</p>
-              <div className="payment-methods">
+              <div className="mpesa-wrap">
                 <span>Secure payments via:</span>
-                <div className="mpesa-badge">M-Pesa</div>
+                <span className="mpesa-badge">M-Pesa</span>
               </div>
             </div>
             <div className="footer-links">
               <h4>Platform</h4>
               <a href="#features">Features</a>
               <a href="#how-it-works">How It Works</a>
-              <a href="#pricing">Pricing</a>
               <a href="/employer/search">Browse Talent</a>
             </div>
             <div className="footer-links">
@@ -478,9 +297,9 @@ function Home() {
             </div>
             <div className="footer-links">
               <h4>Contact</h4>
-              <p><Mail size={14} /> support@kazilive.com</p>
-              <p><Phone size={14} /> +254 700 000 000</p>
-              <p>Nairobi, Kenya</p>
+              <p className="footer-contact"><Mail size={14} /> support@kazilive.com</p>
+              <p className="footer-contact"><Phone size={14} /> +254 700 000 000</p>
+              <p className="footer-contact">Nairobi, Kenya</p>
             </div>
           </div>
           <div className="footer-bottom">
@@ -489,861 +308,629 @@ function Home() {
         </div>
       </footer>
 
-      <style jsx>{`
-        /* Global Styles */
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+        :root {
+          --maroon: #7B1B2E;
+          --maroon-deep: #4E0E1C;
+          --maroon-light: rgba(123,27,46,0.12);
+          --orange: #E05C1A;
+          --orange-light: rgba(224,92,26,0.15);
+          --black: #0C0C0C;
+          --offblack: #171717;
+          --white: #FFFFFF;
+          --white90: rgba(255,255,255,0.9);
+          --white60: rgba(255,255,255,0.6);
+          --white20: rgba(255,255,255,0.18);
+          --white10: rgba(255,255,255,0.08);
+          --gray: #f3f0ef;
+          --text-dark: #1a0a0e;
+          --text-mid: #5a3840;
+          --border-light: rgba(123,27,46,0.15);
+          --glass-bg: rgba(255,255,255,0.65);
+          --glass-border: rgba(255,255,255,0.4);
+          --shadow-card: 0 8px 32px rgba(123,27,46,0.12);
+          --shadow-lg: 0 20px 60px rgba(123,27,46,0.18);
+          --radius: 20px;
+          --radius-sm: 12px;
+          --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         .home-page {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          color: #1a1a1a;
+          font-family: 'DM Sans', sans-serif;
+          color: var(--text-dark);
+          background: var(--white);
           overflow-x: hidden;
         }
 
+        .section-container {
+          max-width: 1180px;
+          margin: 0 auto;
+          padding: 0 28px;
+        }
 
-        /* Hero Section */
+        .section-header {
+          text-align: center;
+          margin-bottom: 64px;
+        }
+
+        .section-header h2 {
+          font-family: 'Playfair Display', serif;
+          font-size: 2.8rem;
+          font-weight: 900;
+          color: var(--text-dark);
+          margin-bottom: 16px;
+          line-height: 1.15;
+        }
+
+        .section-header p {
+          font-size: 1.1rem;
+          color: var(--text-mid);
+          max-width: 620px;
+          margin: 0 auto;
+          line-height: 1.7;
+        }
+
+        .section-tag {
+          display: inline-block;
+          padding: 6px 18px;
+          background: var(--maroon-light);
+          color: var(--maroon);
+          border-radius: 40px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          margin-bottom: 18px;
+          border: 1px solid var(--border-light);
+        }
+
+        /* ── HERO ── */
         .hero-section {
           position: relative;
           min-height: 100vh;
           display: flex;
           align-items: center;
-          background: black;
+          justify-content: center;
+          padding: 140px 0 100px;
+          background-image: url('https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?auto=format&fit=crop&w=1800&q=80');
+          background-size: cover;
+          background-position: center top;
+          background-attachment: fixed;
           overflow: hidden;
-          padding: 100px 0;
         }
 
         .hero-overlay {
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(135deg, rgba(128, 0, 32, 0.3), rgba(0, 0, 0, 0.9));
+          inset: 0;
+          background: linear-gradient(
+            135deg,
+            rgba(10,3,6,0.95) 0%,
+            rgba(30,8,15,0.92) 50%,
+            rgba(5,2,4,0.97) 100%
+          );
           z-index: 1;
         }
 
-        .hero-container {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 0 24px;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 60px;
-          position: relative;
+        .hero-noise {
+          position: absolute;
+          inset: 0;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+          opacity: 0.4;
           z-index: 2;
         }
 
-        .hero-badge {
-          display: inline-flex;
+        .hero-container {
+          position: relative;
+          z-index: 3;
+          display: flex;
+          flex-direction: column;
           align-items: center;
-          gap: 8px;
-          background: rgba(128, 0, 32, 0.2);
-          backdrop-filter: blur(10px);
-          padding: 8px 16px;
+          text-align: center;
+        }
+
+        .hero-tag {
+          display: inline-block;
+          padding: 8px 22px;
+          background: rgba(224,92,26,0.2);
+          border: 1px solid rgba(224,92,26,0.5);
+          color: #f5a97a;
           border-radius: 40px;
-          color: #800020;
-          font-size: 0.875rem;
-          margin-bottom: 24px;
-          border: 1px solid rgba(128, 0, 32, 0.5);
+          font-size: 0.8rem;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          margin-bottom: 28px;
+          backdrop-filter: blur(8px);
         }
 
         .hero-title {
-          font-size: 4rem;
-          font-weight: 800;
-          color: white;
-          line-height: 1.1;
-          margin-bottom: 24px;
-          letter-spacing: -1px;
+          font-family: 'Playfair Display', serif;
+          font-size: 5.5rem;
+          font-weight: 900;
+          line-height: 1.05;
+          color: var(--white);
+          margin-bottom: 28px;
+          letter-spacing: -0.02em;
+          max-width: 900px;
         }
 
-        .yellow-text {
-          color: var(--yellow);
-        }
-
-        .maroon-text {
-          color: var(--maroon);
+        .hero-accent {
+          color: var(--orange);
+          display: block;
         }
 
         .hero-subtitle {
-          font-size: 1.125rem;
-          color: rgba(255, 255, 255, 0.8);
-          line-height: 1.6;
-          margin-bottom: 32px;
+          font-size: 1.3rem;
+          color: rgba(255,255,255,0.75);
+          line-height: 1.65;
+          margin-bottom: 48px;
+          max-width: 620px;
         }
 
         .hero-buttons {
           display: flex;
-          gap: 16px;
-          margin-bottom: 32px;
+          gap: 18px;
+          margin-bottom: 80px;
+          flex-wrap: wrap;
+          justify-content: center;
         }
 
-        .btn-primary {
+        .btn-primary-hero {
           display: inline-flex;
           align-items: center;
-          justify-content: center;
-          gap: 8px;
-          padding: 14px 32px;
-          background: #800020;
+          gap: 10px;
+          padding: 16px 36px;
+          background: var(--orange);
           color: white;
-          text-decoration: none;
-          border-radius: 40px;
-          font-weight: 600;
-          transition: all 0.3s;
-          box-shadow: 0 4px 15px rgba(128, 0, 32, 0.3);
+          border: none;
+          border-radius: var(--radius-sm);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 1rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: var(--transition);
+          box-shadow: 0 8px 30px rgba(224,92,26,0.4);
         }
 
-        .btn-primary:hover {
-          background: #5a0016;
-          transform: translateY(-2px);
-          box-shadow: 0 10px 25px rgba(128, 0, 32, 0.5);
-          color: white;
+        .btn-primary-hero:hover {
+          background: #c94f13;
+          transform: translateY(-3px);
+          box-shadow: 0 14px 40px rgba(224,92,26,0.5);
         }
 
-        .btn-secondary {
+        .btn-glass-hero {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          padding: 14px 32px;
-          background: rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(10px);
+          gap: 10px;
+          padding: 16px 36px;
+          background: rgba(255,255,255,0.12);
           color: white;
-          text-decoration: none;
-          border-radius: 40px;
+          border: 1px solid rgba(255,255,255,0.3);
+          border-radius: var(--radius-sm);
+          font-family: 'DM Sans', sans-serif;
+          font-size: 1rem;
           font-weight: 600;
-          transition: all 0.3s;
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          cursor: pointer;
+          transition: var(--transition);
+          backdrop-filter: blur(12px);
         }
 
-        .btn-secondary:hover {
-          background: rgba(255, 255, 255, 0.2);
-          transform: translateY(-2px);
+        .btn-glass-hero:hover {
+          background: rgba(255,255,255,0.22);
+          transform: translateY(-3px);
         }
 
-        .trust-badge {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 20px;
-          background: rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(10px);
-          border-radius: 40px;
-          width: fit-content;
+        .hero-stats {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1px;
+          background: rgba(255,255,255,0.15);
+          border: 1px solid rgba(255,255,255,0.2);
+          border-radius: var(--radius);
+          overflow: hidden;
+          backdrop-filter: blur(16px);
+          width: 100%;
+          max-width: 860px;
         }
 
-        .trust-icons {
-          display: flex;
-          gap: 8px;
-          color: var(--yellow);
+        .hero-stat-item {
+          padding: 28px 20px;
+          text-align: center;
+          background: rgba(255,255,255,0.06);
+          transition: var(--transition);
         }
 
-        .trust-badge span {
-          color: rgba(255, 255, 255, 0.7);
-          font-size: 0.875rem;
+        .hero-stat-item:hover {
+          background: rgba(255,255,255,0.12);
         }
 
-        /* Hero Visual */
-        .stats-card {
-          background: white;
-          border-radius: 20px;
-          padding: 24px;
-          margin-bottom: 24px;
-          display: flex;
-          justify-content: space-around;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-          border: 1px solid rgba(128, 0, 32, 0.1);
-        }
-
-        .stat-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .yellow-icon {
-          color: var(--yellow);
-        }
-
-        .stat-item strong {
-          font-size: 1.25rem;
-          color: #1a1a1a;
-        }
-
-        .stat-item span {
-          font-size: 0.875rem;
-          color: #666;
-        }
-
-        .stat-divider {
-          width: 1px;
-          background: #e0e0e0;
-        }
-
-        .talent-preview {
-          background: white;
-          border-radius: 16px;
-          padding: 20px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        .preview-header {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin-bottom: 16px;
-          padding-bottom: 12px;
-          border-bottom: 2px solid #f0f0f0;
-          font-weight: 600;
-        }
-
-        .talent-card {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px;
-          border-radius: 12px;
-          margin-bottom: 12px;
-          transition: all 0.3s;
-        }
-
-        .talent-card.featured {
-          background: #f9f9f9;
-          border-left: 3px solid #800020;
-        }
-
-        .talent-avatar {
-          width: 48px;
-          height: 48px;
-          background: #800020;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-weight: 600;
-        }
-
-        .talent-details {
-          flex: 1;
-        }
-
-        .talent-name {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-weight: 600;
-          margin-bottom: 4px;
-        }
-
-        .verified-badge {
-          color: #800020;
-        }
-
-        .talent-role {
-          font-size: 0.875rem;
-          color: #666;
+        .hero-stat-number {
+          display: block;
+          font-family: 'Playfair Display', serif;
+          font-size: 2rem;
+          font-weight: 900;
+          color: var(--orange);
           margin-bottom: 6px;
         }
 
-        .talent-meta {
-          display: flex;
-          gap: 12px;
-          font-size: 0.75rem;
-          color: #999;
+        .hero-stat-label {
+          font-size: 0.82rem;
+          color: rgba(255,255,255,0.7);
+          font-weight: 500;
+          letter-spacing: 0.02em;
         }
 
-        /* Stats Section */
-        .stats-section {
+        /* ── PROBLEM / SOLUTION ── */
+        .problem-section {
+          padding: 110px 0;
+          background: var(--gray);
+        }
+
+        .ps-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 32px;
+        }
+
+        .ps-card {
+          padding: 48px;
+          border-radius: var(--radius);
+          border: 1px solid transparent;
+        }
+
+        .problem-card {
+          background: white;
+          border-color: var(--border-light);
+          box-shadow: var(--shadow-card);
+        }
+
+        .solution-card {
           background: var(--maroon);
-          padding: 80px 0;
+          color: white;
+          box-shadow: var(--shadow-lg);
+        }
+
+        .ps-card-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 1.5rem;
+          font-weight: 900;
+          margin-bottom: 36px;
+          padding-bottom: 20px;
+          border-bottom: 2px solid;
+        }
+
+        .problem-card .ps-card-title { border-color: var(--border-light); color: var(--text-dark); }
+        .solution-card .ps-card-title { border-color: rgba(255,255,255,0.2); color: white; }
+
+        .ps-item {
+          display: flex;
+          gap: 18px;
+          align-items: flex-start;
+          margin-bottom: 28px;
+        }
+
+        .ps-item:last-of-type { margin-bottom: 0; }
+
+        .ps-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: #dc2626;
+          margin-top: 6px;
+          flex-shrink: 0;
+        }
+
+        .problem-item h4 {
+          font-weight: 700;
+          margin-bottom: 6px;
+          color: var(--text-dark);
+          font-size: 1rem;
+        }
+
+        .problem-item p {
+          color: var(--text-mid);
+          font-size: 0.92rem;
+          line-height: 1.6;
+        }
+
+        .solution-item {
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .solution-item span {
+          color: rgba(255,255,255,0.9);
+          font-weight: 600;
+          font-size: 0.98rem;
+        }
+
+        .check-icon { color: #f5a97a; flex-shrink: 0; }
+
+        .btn-primary-block {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-top: 36px;
+          padding: 15px 28px;
+          background: var(--orange);
+          color: white;
+          border: none;
+          border-radius: var(--radius-sm);
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 700;
+          font-size: 0.95rem;
+          cursor: pointer;
+          transition: var(--transition);
+          width: 100%;
+          justify-content: center;
+        }
+
+        .btn-primary-block:hover {
+          background: #c94f13;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(224,92,26,0.35);
+        }
+
+        /* ── FEATURES ── */
+        .features-section {
+          padding: 110px 0;
+          background: white;
+        }
+
+        .features-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 28px;
+        }
+
+        .feature-card {
+          background: var(--glass-bg);
+          backdrop-filter: blur(16px);
+          border: 1px solid var(--glass-border);
+          border-radius: var(--radius);
+          padding: 40px 36px;
+          transition: var(--transition);
+          box-shadow: var(--shadow-card);
+        }
+
+        .feature-card:hover {
+          transform: translateY(-8px);
+          box-shadow: var(--shadow-lg);
+          border-color: var(--border-light);
+        }
+
+        .feature-icon-wrap {
+          width: 58px;
+          height: 58px;
+          border-radius: 16px;
+          background: var(--maroon-light);
+          color: var(--maroon);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 24px;
+          border: 1px solid var(--border-light);
+        }
+
+        .feature-card h3 {
+          font-weight: 700;
+          font-size: 1.15rem;
+          margin-bottom: 12px;
+          color: var(--text-dark);
+        }
+
+        .feature-card p {
+          color: var(--text-mid);
+          font-size: 0.92rem;
+          line-height: 1.65;
+        }
+
+        /* ── HOW IT WORKS ── */
+        .how-section {
+          padding: 110px 0;
+          background: var(--maroon-deep);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .how-section::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(ellipse at 70% 50%, rgba(224,92,26,0.12) 0%, transparent 60%);
+        }
+
+        .how-section .section-header h2,
+        .how-section .section-header p {
           color: white;
         }
 
-        .stats-grid {
+        .how-section .section-header p { color: rgba(255,255,255,0.65); }
+
+        .how-section .section-tag {
+          background: rgba(224,92,26,0.2);
+          color: #f5a97a;
+          border-color: rgba(224,92,26,0.35);
+        }
+
+        .steps-grid {
+          position: relative;
+          z-index: 1;
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 40px;
+          gap: 24px;
         }
 
-        .stat-card {
+        .step-card {
           text-align: center;
-          padding: 20px;
-          border-radius: 16px;
-          background: rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          transition: transform 0.3s;
+          padding: 44px 28px;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: var(--radius);
+          backdrop-filter: blur(12px);
+          transition: var(--transition);
         }
 
-        .stat-card:hover {
-          transform: translateY(-5px);
-          background: rgba(255, 255, 255, 0.1);
+        .step-card:hover {
+          background: rgba(255,255,255,0.1);
+          transform: translateY(-6px);
         }
 
-        .stat-icon {
-          color: var(--yellow);
+        .step-num {
+          font-family: 'Playfair Display', serif;
+          font-size: 3.5rem;
+          font-weight: 900;
+          color: rgba(224,92,26,0.25);
+          line-height: 1;
           margin-bottom: 16px;
         }
 
-        .stat-number {
-          font-size: 3rem;
-          font-weight: 800;
-          color: white;
-          margin-bottom: 8px;
+        .step-icon-wrap {
+          width: 72px;
+          height: 72px;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.18);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 24px;
+          color: var(--orange);
         }
 
-        .stat-label {
-          color: rgba(255, 255, 255, 0.8);
+        .step-card h3 {
+          font-weight: 700;
+          font-size: 1.1rem;
+          color: white;
+          margin-bottom: 12px;
+        }
+
+        .step-card p {
+          color: rgba(255,255,255,0.6);
+          font-size: 0.9rem;
+          line-height: 1.65;
+        }
+
+        /* ── TESTIMONIALS ── */
+        .testimonials-section {
+          padding: 110px 0;
+          background: var(--gray);
+        }
+
+        .testimonials-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 28px;
+        }
+
+        .testimonial-card {
+          background: white;
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius);
+          padding: 40px;
+          box-shadow: var(--shadow-card);
+          transition: var(--transition);
+        }
+
+        .testimonial-card:hover {
+          transform: translateY(-6px);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .testimonial-stars {
+          display: flex;
+          gap: 4px;
+          margin-bottom: 20px;
+        }
+
+        .testimonial-content {
           font-size: 1rem;
+          color: var(--text-mid);
+          line-height: 1.75;
+          margin-bottom: 28px;
           font-weight: 500;
         }
 
-        /* Problem Section */
-        .problem-section {
-          padding: 100px 0;
-          background: white;
-          color: var(--black);
+        .testimonial-author {
+          display: flex;
+          align-items: center;
+          gap: 14px;
         }
 
-        .problem-grid {
+        .author-img {
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 2px solid var(--border-light);
+        }
+
+        .author-name {
+          font-weight: 700;
+          color: var(--text-dark);
+          font-size: 0.95rem;
+        }
+
+        .author-role {
+          font-size: 0.82rem;
+          color: var(--text-mid);
+          margin-top: 2px;
+        }
+
+        /* ── APPS ── */
+        .apps-section {
+          padding: 110px 0;
+          background: white;
+        }
+
+        .apps-content {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 80px;
           align-items: center;
         }
 
-        .section-tag {
-          display: inline-block;
-          padding: 6px 12px;
-          background: rgba(128, 0, 32, 0.1);
-          color: #800020;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 600;
+        .apps-text .section-tag { margin-bottom: 20px; }
+
+        .apps-text h2 {
+          font-family: 'Playfair Display', serif;
+          font-size: 2.8rem;
+          font-weight: 900;
+          line-height: 1.15;
+          color: var(--text-dark);
           margin-bottom: 20px;
         }
 
-        .maroon-tag {
-          background: #800020;
-          color: white;
-        }
-
-        .problem-section h2, .solution-content h2 {
-          font-size: 2.5rem;
-          margin-bottom: 24px;
-          color: #1a1a1a;
-        }
-
-        .problem-list {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-        }
-
-        .problem-item {
-          display: flex;
-          gap: 16px;
-          align-items: flex-start;
-        }
-
-        .problem-icon {
-          font-size: 2rem;
-        }
-
-        .problem-item h4 {
-          margin-bottom: 8px;
-          color: var(--maroon);
-          font-size: 1.25rem;
-        }
-
-        .problem-item p {
-          color: #666;
-        }
-
-        .solution-features {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-          margin-top: 24px;
-        }
-
-        .solution-features div {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.875rem;
-        }
-
-        .maroon-check {
-          color: #800020;
-        }
-
-        /* Features Section */
-        .features-section {
-          padding: 100px 0;
-          background: white;
-          color: var(--black);
-        }
-
-        .section-container {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 0 24px;
-        }
-
-        .section-header {
-          margin-bottom: 48px;
-        }
-
-        .section-header.text-center {
-          text-align: center;
-        }
-
-        .section-header h2 {
-          font-size: 2.5rem;
-          margin-bottom: 16px;
-          color: #1a1a1a;
-        }
-
-        .features-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 32px;
-        }
-
-        .feature-card {
-          padding: 32px;
-          background: #fafafa;
-          border-radius: 16px;
-          transition: all 0.3s;
-          border: 1px solid #e0e0e0;
-        }
-
-        .feature-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-          border-color: #800020;
-        }
-
-        .feature-icon {
-          width: 64px;
-          height: 64px;
-          background: var(--maroon);
-          border-radius: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: var(--yellow);
-          margin-bottom: 24px;
-          box-shadow: 0 8px 20px rgba(128, 0, 32, 0.2);
-        }
-
-        .feature-card h3 {
-          margin-bottom: 12px;
-          color: #1a1a1a;
-        }
-
-        .feature-card p {
-          color: #666;
-          line-height: 1.6;
-        }
-
-        /* Browse Section */
-        .browse-section {
-          padding: 80px 0;
-          background: #fafafa;
-        }
-
-        .section-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-          margin-bottom: 32px;
-        }
-
-        .search-filters {
-          background: white;
-          padding: 24px;
-          border-radius: 16px;
-          margin-bottom: 32px;
-          border: 1px solid #e0e0e0;
-        }
-
-        .search-bar {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 16px;
-          border: 2px solid #e0e0e0;
-          border-radius: 12px;
-          margin-bottom: 20px;
-        }
-
-        .search-bar input {
-          flex: 1;
-          border: none;
-          outline: none;
-          font-size: 1rem;
-        }
-
-        .category-filters {
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-        }
-
-        .category-btn {
-          padding: 8px 20px;
-          background: #fafafa;
-          border: 1px solid #e0e0e0;
-          border-radius: 40px;
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-
-        .category-btn.active {
-          background: #800020;
-          color: white;
-          border-color: #800020;
-        }
-
-        .talents-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 24px;
-        }
-
-        .talent-profile-card {
-          background: white;
-          border-radius: 20px;
-          overflow: hidden;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          border: 1px solid #e0e0e0;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .talent-profile-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-          border-color: var(--maroon);
-        }
-
-        .profile-header {
-          background: #800020;
-          padding: 24px;
-          position: relative;
-        }
-
-        .profile-avatar {
-          width: 64px;
-          height: 64px;
-          background: white;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #800020;
-        }
-
-        .verified-tag {
-          position: absolute;
-          top: 16px;
-          right: 16px;
-          background: var(--yellow);
-          padding: 6px 12px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          color: var(--black);
-          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .profile-body {
-          padding: 20px;
-        }
-
-        .profile-body h4 {
-          margin-bottom: 4px;
-          color: #1a1a1a;
-        }
-
-        .profile-role {
-          color: #666;
-          font-size: 0.875rem;
-          margin-bottom: 16px;
-        }
-
-        .profile-details {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-          margin-bottom: 16px;
-          font-size: 0.75rem;
-          color: #666;
-        }
-
-        .profile-details span {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-        }
-
-        .profile-skills {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-          margin-bottom: 20px;
-        }
-
-        .skill-tag {
-          padding: 4px 12px;
-          background: #f0f0f0;
-          border-radius: 20px;
-          font-size: 0.75rem;
-        }
-
-        .view-profile-btn {
-          width: 100%;
-          padding: 10px;
-          background: #800020;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          cursor: pointer;
-          transition: all 0.3s;
-        }
-
-        .view-profile-btn:hover {
-          background: #5a0016;
-        }
-
-        /* How It Works */
-        .how-it-works {
-          padding: 80px 0;
-          background: white;
-        }
-
-        .steps-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 32px;
-        }
-
-        .step-card {
-          text-align: center;
-          padding: 32px;
-          position: relative;
-          background: #fafafa;
-          border-radius: 16px;
-          border: 1px solid #e0e0e0;
-        }
-
-        .step-number {
-          position: absolute;
-          top: -16px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 40px;
-          height: 40px;
-          background: #800020;
-          color: white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-        }
-
-        .step-icon {
-          width: 80px;
-          height: 80px;
-          background: rgba(128, 0, 32, 0.05);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 20px;
-          color: var(--maroon);
-          border: 2px solid rgba(128, 0, 32, 0.1);
-        }
-
-        /* Pricing Section */
-        .pricing-section {
-          padding: 80px 0;
-          background: #fafafa;
-        }
-
-        .pricing-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 32px;
-          max-width: 800px;
-          margin: 0 auto;
-        }
-
-        .pricing-card {
-          background: white;
-          border-radius: 24px;
-          padding: 32px;
-          position: relative;
-          border: 1px solid #e0e0e0;
-        }
-
-        .pricing-card.featured {
-          border: 2px solid var(--maroon);
-          box-shadow: 0 20px 40px rgba(128, 0, 32, 0.15);
-          transform: scale(1.05);
-          z-index: 10;
-        }
-
-        .pricing-badge {
-          position: absolute;
-          top: -12px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: #800020;
-          color: white;
-          padding: 4px 16px;
-          border-radius: 20px;
-          font-size: 0.75rem;
-          font-weight: 600;
-        }
-
-        .maroon-badge {
-          background: var(--yellow);
-          color: var(--black);
-        }
-
-        .pricing-price {
-          font-size: 2.5rem;
-          font-weight: 800;
-          text-align: center;
-          margin-top: 24px;
-          color: #1a1a1a;
-        }
-
-        .pricing-duration {
-          text-align: center;
-          color: #666;
-          margin-bottom: 24px;
-        }
-
-        .pricing-features {
-          list-style: none;
-          padding: 0;
-          margin-bottom: 32px;
-        }
-
-        .pricing-features li {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 0;
-          font-size: 0.875rem;
-        }
-
-        .full-width {
-          width: 100%;
-          text-align: center;
-          justify-content: center;
-        }
-
-        /* Testimonials */
-        .testimonials-section {
-          padding: 80px 0;
-          background: white;
-        }
-
-        .testimonials-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 32px;
-        }
-
-        .testimonial-card {
-          padding: 32px;
-          background: white;
-          border-radius: 20px;
-          border: 1px solid #e0e0e0;
-          transition: all 0.3s;
-        }
-
-        .testimonial-card:hover {
-          border-color: var(--maroon);
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        }
-
-        .testimonial-stars {
-          display: flex;
-          gap: 4px;
-          margin-bottom: 16px;
-        }
-
-        .testimonial-content {
-          font-style: italic;
-          margin-bottom: 24px;
-          line-height: 1.6;
-          color: #333;
-        }
-
-        .testimonial-author {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .testimonial-author img {
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          object-fit: cover;
-        }
-
-        /* Apps Section */
-        .apps-section {
-          padding: 80px 0;
-          background: black;
-          color: white;
-        }
-
-        .apps-content {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 60px;
-          align-items: center;
-        }
-
-        .white-tag {
-          background: rgba(255, 255, 255, 0.2);
-          color: white;
-        }
-
-        .app-buttons {
-          margin-top: 32px;
+        .apps-accent { color: var(--maroon); }
+
+        .apps-text p {
+          font-size: 1.05rem;
+          color: var(--text-mid);
+          line-height: 1.7;
+          margin-bottom: 36px;
         }
 
         .app-store-btn {
           display: inline-flex;
           align-items: center;
           gap: 12px;
-          padding: 12px 24px;
-          background: #800020;
+          padding: 14px 28px;
+          background: var(--offblack);
           color: white;
           border: none;
-          border-radius: 12px;
+          border-radius: var(--radius-sm);
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 700;
           cursor: pointer;
-          transition: all 0.3s;
+          transition: var(--transition);
         }
 
         .app-store-btn:hover {
-          background: #5a0016;
+          background: var(--maroon);
           transform: translateY(-2px);
         }
 
@@ -1353,296 +940,169 @@ function Home() {
         }
 
         .mockup-screen {
-          width: 240px;
-          background: white;
-          border-radius: 32px;
-          padding: 16px;
-          color: #1a1a1a;
+          width: 270px;
+          background: var(--offblack);
+          border-radius: 44px;
+          padding: 36px 24px;
+          border: 6px solid #2a2a2a;
+          box-shadow: 0 40px 80px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+          transform: rotate(-4deg);
         }
 
         .mockup-header {
           display: flex;
           align-items: center;
           gap: 8px;
-          padding-bottom: 16px;
-          border-bottom: 1px solid #e0e0e0;
-          margin-bottom: 16px;
+          margin-bottom: 32px;
+          font-weight: 800;
+          color: white;
+          font-size: 1.1rem;
         }
 
-        .mockup-notification {
-          background: rgba(128, 0, 32, 0.1);
-          padding: 12px;
-          border-radius: 12px;
+        .mo-accent { color: var(--orange); }
+
+        .mockup-notif {
+          background: rgba(255,255,255,0.06);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(255,255,255,0.1);
+          padding: 16px;
+          border-radius: 14px;
           display: flex;
           gap: 12px;
+          align-items: flex-start;
+          margin-bottom: 14px;
+          border-left: 3px solid var(--orange);
+        }
+
+        .mockup-notif strong {
+          display: block;
+          font-size: 0.82rem;
+          color: white;
+          font-weight: 700;
+        }
+
+        .mockup-notif small {
+          color: rgba(255,255,255,0.5);
           font-size: 0.75rem;
         }
 
-        /* CTA Section */
-        .cta-section {
-          padding: 80px 0;
-          background: #1a1a1a;
-          color: white;
-        }
-
-        .cta-content {
-          text-align: center;
-          max-width: 600px;
-          margin: 0 auto;
-        }
-
-        .cta-content h2 {
-          font-size: 2.5rem;
-          margin-bottom: 16px;
-        }
-
-        .cta-buttons {
-          display: flex;
-          gap: 16px;
-          justify-content: center;
-          margin-top: 32px;
-        }
-
-        .btn-primary.large {
-          padding: 16px 40px;
-          font-size: 1.125rem;
-        }
-
-        .btn-outline-light {
-          padding: 16px 40px;
-          background: transparent;
-          border: 2px solid white;
-          color: white;
-          text-decoration: none;
-          border-radius: 40px;
-          font-weight: 600;
-          transition: all 0.3s;
-        }
-
-        .btn-outline-light:hover {
-          background: white;
-          color: #1a1a1a;
-        }
-
-        /* Footer */
+        /* ── FOOTER ── */
         .footer {
-          background: black;
-          color: #999;
-          padding: 60px 0 20px;
+          padding: 90px 0 40px;
+          background: var(--black);
+          color: rgba(255,255,255,0.7);
         }
 
         .footer-grid {
           display: grid;
-          grid-template-columns: 2fr 1fr 1fr 1.5fr;
-          gap: 40px;
-          margin-bottom: 40px;
+          grid-template-columns: 2fr 1fr 1fr 1fr;
+          gap: 56px;
+          margin-bottom: 72px;
         }
 
-        .footer-brand .logo {
-          margin-bottom: 16px;
+        .footer-logo {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 20px;
+          font-family: 'Playfair Display', serif;
+          font-size: 1.5rem;
+          font-weight: 900;
+          color: white;
         }
+
+        .footer-logo-icon { color: var(--orange); }
 
         .footer-brand p {
-          margin-bottom: 16px;
-          color: #999;
+          color: rgba(255,255,255,0.5);
+          line-height: 1.7;
+          font-size: 0.92rem;
+          margin-bottom: 28px;
         }
 
-        .payment-methods {
-          margin-top: 16px;
+        .mpesa-wrap {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 0.82rem;
+          color: rgba(255,255,255,0.4);
         }
 
         .mpesa-badge {
-          display: inline-block;
-          padding: 4px 12px;
-          background: #800020;
+          padding: 6px 14px;
+          background: #059669;
           color: white;
-          border-radius: 4px;
-          font-size: 0.75rem;
-          margin-top: 8px;
+          border-radius: 6px;
+          font-weight: 700;
+          font-size: 0.8rem;
         }
 
         .footer-links h4 {
           color: white;
-          margin-bottom: 16px;
+          font-weight: 700;
+          margin-bottom: 22px;
+          font-size: 0.92rem;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
         }
 
         .footer-links a {
           display: block;
-          color: #999;
+          color: rgba(255,255,255,0.5);
           text-decoration: none;
           margin-bottom: 12px;
-          transition: color 0.3s;
+          font-size: 0.9rem;
+          font-weight: 500;
+          transition: var(--transition);
         }
 
-        .footer-links a:hover {
-          color: #800020;
-        }
+        .footer-links a:hover { color: var(--orange); }
 
-        .footer-links p {
+        .footer-contact {
           display: flex;
           align-items: center;
           gap: 8px;
+          color: rgba(255,255,255,0.5);
+          font-size: 0.9rem;
           margin-bottom: 12px;
         }
 
         .footer-bottom {
+          padding-top: 36px;
+          border-top: 1px solid rgba(255,255,255,0.08);
           text-align: center;
-          padding-top: 20px;
-          border-top: 1px solid #1a1a1a;
+          color: rgba(255,255,255,0.3);
+          font-size: 0.85rem;
         }
 
-        /* Responsive Styles */
-        @media (max-width: 1200px) {
-          .section-container, .hero-container, .nav-container {
-            width: 95%;
-            padding: 0 20px;
-          }
-        }
-
+        /* ── RESPONSIVE ── */
         @media (max-width: 1024px) {
-          .hero-container {
-            grid-template-columns: 1fr;
-            text-align: center;
-            gap: 40px;
-          }
-
-          .hero-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-          }
-
-          .hero-title {
-            font-size: 3.5rem;
-          }
-
-          .hero-buttons {
-            justify-content: center;
-          }
-
-          .trust-badge {
-            margin: 0 auto;
-          }
-
-          .hero-visual {
-            max-width: 600px;
-            margin: 0 auto;
-          }
-
-          .features-grid, .talents-grid, .testimonials-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          .problem-grid, .apps-content {
-            grid-template-columns: 1fr;
-            gap: 40px;
-          }
-          
-          .footer-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
+          .hero-title { font-size: 4rem; }
+          .features-grid { grid-template-columns: repeat(2, 1fr); }
+          .steps-grid { grid-template-columns: repeat(2, 1fr); }
+          .hero-stats { grid-template-columns: repeat(2, 1fr); }
+          .footer-grid { grid-template-columns: repeat(2, 1fr); gap: 40px; }
+          .apps-content { grid-template-columns: 1fr; gap: 60px; text-align: center; }
+          .apps-text { display: flex; flex-direction: column; align-items: center; }
         }
 
         @media (max-width: 768px) {
-          .floating-nav {
-            width: 100%;
-            top: 0;
-            border-radius: 0;
-            padding: 10px 20px;
-          }
-
-          .desktop-only {
-            display: none;
-          }
-
-          .mobile-menu-toggle {
-            display: block;
-          }
-
-          .nav-links {
-            position: fixed;
-            top: 70px;
-            left: 0;
-            width: 100%;
-            height: calc(100vh - 70px);
-            background: black;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px 20px;
-            gap: 24px;
-            transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
-            z-index: 1001;
-            overflow-y: auto;
-          }
-
-          .nav-links.active {
-            transform: translateX(0);
-          }
-
-          .nav-links a {
-            font-size: 1.25rem;
-            width: 100%;
-            text-align: center;
-            padding: 12px;
-          }
-
-          .mobile-only-buttons {
-            display: flex;
-          }
-
-          .hero-title {
-            font-size: 2.75rem;
-          }
-
-          .hero-buttons {
-            flex-direction: column;
-            width: 100%;
-          }
-
-          .btn-primary, .btn-secondary {
-            width: 100%;
-          }
-
-          .stats-grid, .features-grid, .talents-grid, .steps-grid, .pricing-grid, .testimonials-grid, .footer-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .stats-card {
-            flex-direction: column;
-            gap: 20px;
-          }
-
-          .stat-divider {
-            width: 100%;
-            height: 1px;
-          }
-
-          .section-header h2 {
-            font-size: 2rem;
-          }
-          
-          .pricing-card.featured {
-            transform: none;
-          }
-          
-          .cta-buttons {
-            flex-direction: column;
-          }
-          
-          .btn-primary.large, .btn-outline-light {
-            width: 100%;
-          }
+          .hero-title { font-size: 3rem; }
+          .hero-subtitle { font-size: 1.05rem; }
+          .hero-buttons { flex-direction: column; width: 100%; }
+          .btn-primary-hero, .btn-glass-hero { width: 100%; justify-content: center; }
+          .ps-grid { grid-template-columns: 1fr; }
+          .features-grid { grid-template-columns: 1fr; }
+          .steps-grid { grid-template-columns: 1fr; }
+          .testimonials-grid { grid-template-columns: 1fr; }
+          .section-header h2 { font-size: 2.2rem; }
+          .hero-stats { grid-template-columns: repeat(2, 1fr); }
+          .footer-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 480px) {
-          .hero-title {
-            font-size: 2.25rem;
-          }
-          
-          .stat-number {
-            font-size: 2rem;
-          }
+          .hero-title { font-size: 2.5rem; }
+          .hero-stats { grid-template-columns: 1fr 1fr; }
         }
       `}</style>
     </div>

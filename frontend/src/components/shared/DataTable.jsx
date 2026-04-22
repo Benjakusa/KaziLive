@@ -39,7 +39,7 @@ const DataTable = ({ columns, data, title, actions, loading, emptyMessage }) => 
                         <Search size={18} />
                         <input
                             type="text"
-                            placeholder="Search..."
+                            placeholder="Search records..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -73,7 +73,7 @@ const DataTable = ({ columns, data, title, actions, loading, emptyMessage }) => 
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={columns.length} className="empty-state-row">
+                                <td colSpan={columns.length} className="text-center py-8 text-secondary">
                                     {emptyMessage || 'No records found'}
                                 </td>
                             </tr>
@@ -84,19 +84,21 @@ const DataTable = ({ columns, data, title, actions, loading, emptyMessage }) => 
 
             <div className="table-footer">
                 <p className="pagination-info">
-                    Showing {Math.min(filteredData.length, (currentPage - 1) * itemsPerPage + 1)} to {Math.min(filteredData.length, currentPage * itemsPerPage)} of {filteredData.length} entries
+                    Showing <b>{Math.min(filteredData.length, (currentPage - 1) * itemsPerPage + 1)}</b> to <b>{Math.min(filteredData.length, currentPage * itemsPerPage)}</b> of <b>{filteredData.length}</b> entries
                 </p>
                 <div className="pagination-controls">
                     <button
                         disabled={currentPage === 1}
                         onClick={() => setCurrentPage(prev => prev - 1)}
+                        title="Previous page"
                     >
                         <ChevronLeft size={18} />
                     </button>
-                    <span className="page-number">{currentPage}</span>
+                    <span className="page-number">Page {currentPage} of {totalPages || 1}</span>
                     <button
-                        disabled={currentPage === totalPages}
+                        disabled={currentPage === totalPages || totalPages === 0}
                         onClick={() => setCurrentPage(prev => prev + 1)}
+                        title="Next page"
                     >
                         <ChevronRight size={18} />
                     </button>

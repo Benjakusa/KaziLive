@@ -110,9 +110,9 @@ const AdminDashboard = () => {
     <div className="dashboard-grid">
       <div className="stats-row">
         <StatCard title="Total Users" value={stats?.total_users || '0'} icon={Users} trend="up" trendValue="--" />
-        <StatCard title="Pending Verifications" value={stats?.pending_verifications || '0'} icon={CheckSquare} color="maroon" />
+        <StatCard title="Pending Verifications" value={stats?.pending_verifications || '0'} icon={CheckSquare} />
         <StatCard title="Total Revenue" value={`KSh ${stats?.total_revenue?.toLocaleString() || '0'}`} icon={CreditCard} trend="up" trendValue="--" />
-        <StatCard title="Active Issues" value="0" icon={AlertTriangle} color="yellow" />
+        <StatCard title="Active Issues" value="0" icon={AlertTriangle} />
       </div>
 
       <div className="dashboard-main-grid">
@@ -131,7 +131,6 @@ const AdminDashboard = () => {
                 ]}
                 xKey="name"
                 yKey="count"
-                color="#800020"
               />
             </div>
           </div>
@@ -147,14 +146,14 @@ const AdminDashboard = () => {
                 {
                   header: 'Type',
                   accessor: 'user_type',
-                  render: (type) => <Badge variant={type === 'jobseeker' ? 'maroon' : 'black'}>{type}</Badge>
+                  render: (type) => <Badge variant={type === 'jobseeker' ? 'primary' : 'success'}>{type}</Badge>
                 },
                 { header: 'Date', accessor: 'uploaded_at' },
                 {
                   header: 'Actions',
                   accessor: 'id',
                   render: (id) => (
-                    <button className="btn-text-maroon" onClick={() => setActiveTab('Verifications')}>Review</button>
+                    <button className="btn-text-primary" onClick={() => setActiveTab('Verifications')}>Review</button>
                   )
                 }
               ]}
@@ -188,8 +187,8 @@ const AdminDashboard = () => {
           <div className="card mt-6">
             <h3>Quick Actions</h3>
             <div className="flex flex-col gap-2 mt-4">
-              <button className="btn-outline-black btn-block" onClick={() => setActiveTab('Users')}>Manage Users</button>
-              <button className="btn-outline-maroon btn-block" onClick={() => setActiveTab('Reports')}>Platform Analytics</button>
+              <button className="btn-secondary btn-block" onClick={() => setActiveTab('Users')}>Manage Users</button>
+              <button className="btn-primary btn-block" onClick={() => setActiveTab('Reports')}>Platform Analytics</button>
             </div>
           </div>
         </div>
