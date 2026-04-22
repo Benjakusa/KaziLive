@@ -17,41 +17,41 @@ export default function JobseekerProfileView() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
 
-  // ===============================
-  // 📥 LOAD PROFILE
-  // ===============================
+  // =========================
+  // LOAD PROFILE
+  // =========================
   useEffect(() => {
-    const loadProfile = async () => {
+    const load = async () => {
       try {
         setLoading(true);
         setError("");
 
         const data = await getProfile();
 
-        // prevent null crashes
-        const safeData = data || {};
+        const safe = data || {};
 
-        setProfile(safeData);
+        setProfile(safe);
 
         setFormData({
-          username: safeData.username || "",
-          email: safeData.email || "",
-          phone: safeData.phone || "",
-          location: safeData.location || "",
+          username: safe.username || "",
+          email: safe.email || "",
+          phone: safe.phone || "",
+          location: safe.location || "",
         });
       } catch (err) {
+        console.error("PROFILE LOAD ERROR:", err);
         setError(err?.message || "Failed to load profile");
       } finally {
         setLoading(false);
       }
     };
 
-    loadProfile();
+    load();
   }, []);
 
-  // ===============================
-  // ✏️ HANDLE INPUT
-  // ===============================
+  // =========================
+  // INPUT HANDLER
+  // =========================
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -59,9 +59,9 @@ export default function JobseekerProfileView() {
     }));
   };
 
-  // ===============================
-  // 📤 IMAGE PREVIEW
-  // ===============================
+  // =========================
+  // FILE PREVIEW
+  // =========================
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
@@ -73,53 +73,62 @@ export default function JobseekerProfileView() {
     reader.readAsDataURL(selected);
   };
 
-  // ===============================
-  // 💾 SAVE PROFILE
-  // ===============================
+  // =========================
+  // SAVE PROFILE (FIXED)
+  // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError("");
 
     try {
-      let uploadedUrl = profile?.avatar || "";
+      let avatarUrl = profile?.avatar || "";
 
-      // upload image if selected
+      // upload image if exists
       if (file) {
-        const uploadRes = await uploadFile(file);
-        uploadedUrl = uploadRes?.url || uploadedUrl;
+        const uploadRes = await uploadFile(file, "profile");
+        avatarUrl = uploadRes?.url || avatarUrl;
       }
 
+      // clean payload (VERY IMPORTANT FIX)
       const payload = {
-        ...formData,
-        avatar: uploadedUrl,
+        username: formData.username?.trim(),
+        email: formData.email?.trim(),
+        phone: formData.phone?.trim(),
+        location: formData.location?.trim(),
+        avatar: avatarUrl,
       };
+
+      console.log("SENDING PROFILE UPDATE:", payload);
 
       const updated = await updateProfile(payload);
 
-      const safeUpdated = updated || payload;
+      console.log("PROFILE UPDATED:", updated);
 
-      setProfile(safeUpdated);
+      setProfile(updated || payload);
 
-      // IMPORTANT: sync UI immediately
       setFormData({
-        username: safeUpdated.username || "",
-        email: safeUpdated.email || "",
-        phone: safeUpdated.phone || "",
-        location: safeUpdated.location || "",
+        username: updated?.username || payload.username,
+        email: updated?.email || payload.email,
+        phone: updated?.phone || payload.phone,
+        location: updated?.location || payload.location,
       });
 
       alert("Profile updated successfully!");
     } catch (err) {
-      setError(err?.message || "Update failed");
+      console.error("UPDATE ERROR FULL:", err);
+
+      // REAL error (NOT fake internet message)
+      setError(
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to update profile"
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  // ===============================
-  // LOADING STATE
-  // ===============================
   if (loading) {
     return (
       <div className="card">
@@ -132,14 +141,12 @@ export default function JobseekerProfileView() {
     <div className="card">
       <h2>My Profile</h2>
 
-      {/* ERROR */}
       {error && (
-        <p style={{ color: "red", marginBottom: 10 }}>
+        <div style={{ color: "red", marginBottom: 10 }}>
           {error}
-        </p>
+        </div>
       )}
 
-      {/* AVATAR */}
       <div style={{ marginBottom: 20 }}>
         <img
           src={
@@ -159,7 +166,6 @@ export default function JobseekerProfileView() {
 
       <input type="file" accept="image/*" onChange={handleFileChange} />
 
-      {/* FORM */}
       <form onSubmit={handleSubmit}>
         <input
           name="username"

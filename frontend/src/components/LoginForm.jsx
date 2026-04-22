@@ -1,24 +1,70 @@
-import React, { useState } from 'react';
-import { login } from '../services/api.js';
+import React, { useState } from "react";
+import { login } from "../services/api";
 
-export default function LoginForm({ userType }) {
-  const [formData, setFormData] = useState({ username: '', password: '' });
+export default function LoginForm() {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await login(userType, formData);
-    alert(JSON.stringify(result));
+
+    try {
+      setLoading(true);
+
+      // ✅ clear old session (VERY IMPORTANT)
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      const res = await login({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      // ✅ save token
+      localStorage.setItem("token", res.token);
+
+      // ✅ force fresh app load (kills stale state)
+      window.location.href = "/jobseeker/dashboard";
+
+    } catch (err) {
+      alert(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <input type="text" name="username" placeholder="0712 345 678 au email" onChange={handleChange} />
-      <input type="password" name="password" placeholder="Nenosiri" onChange={handleChange} />
-      <button type="submit" className="btn btn-primary btn-block">Ingia</button>
+      <input
+        type="email"
+        name="email"
+        placeholder="Enter email"
+        onChange={handleChange}
+        required
+      />
+
+      <input
+        type="password"
+        name="password"
+        placeholder="Enter password"
+        onChange={handleChange}
+        required
+      />
+
+      <button type="submit" disabled={loading}>
+        {loading ? "Logging in..." : "Login"}
+      </button>
     </form>
   );
-}
+} 

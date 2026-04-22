@@ -12,52 +12,65 @@ export default function JobseekerLogin() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
   const [formData, setFormData] = useState({
     identifier: "",
     password: "",
   });
 
-  // Redirect if already logged in
+  // 🚨 FIX: prevent stale user auto-redirect loops
   useEffect(() => {
-    if (user && user.role === "jobseeker") {
-      navigate("/jobseeker/dashboard");
-    } else if (user && user.role === "employer") {
-      navigate("/employer/dashboard");
+    if (!user) return;
+
+    const role = user?.user_type || user?.role;
+
+    if (role === "jobseeker") {
+      navigate("/jobseeker/dashboard", { replace: true });
+    } else if (role === "employer") {
+      navigate("/employer/dashboard", { replace: true });
     }
   }, [user, navigate]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
+    setError("");
 
     try {
-      const data = await login(formData);
+      const res = await login(formData);
 
-      // Ensure correct role
-      if (data.user?.user_type !== "jobseeker") {
-        setError("This is not a jobseeker account.");
-        setLoading(false);
-        return;
+      // 🚨 FIX: strict response validation
+      if (!res || !res.user || !res.access_token) {
+        throw new Error("Invalid server response");
       }
+
+      if (res.user.user_type !== "jobseeker") {
+        throw new Error("This account is not a jobseeker account");
+      }
+
+      // 🚨 FIX: clear stale session before setting new one
+      localStorage.removeItem("token");
+      localStorage.setItem("token", res.access_token);
 
       dispatch(
         loginSuccess({
-          user: data.user,
-          token: data.access_token,
+          user: res.user,
+          token: res.access_token,
         })
       );
 
-      navigate("/jobseeker/dashboard");
+      // 🚨 FIX: force clean navigation
+      navigate("/jobseeker/dashboard", { replace: true });
+
     } catch (err) {
-      setError(err.message || "Login failed");
+      setError(err?.message || "Login failed. Try again.");
     } finally {
       setLoading(false);
     }
@@ -76,9 +89,7 @@ export default function JobseekerLogin() {
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="form-label">
-                Username / Email / Phone
-              </label>
+              <label className="form-label">Username / Email / Phone</label>
 
               <div className="input-icon-wrapper">
                 <User size={18} />
@@ -121,24 +132,11 @@ export default function JobseekerLogin() {
 
             <p className="text-center mt-4 text-muted">
               Don't have an account?{" "}
-              <Link
-                to="/jobseeker/register"
-                style={{ color: "var(--primary)" }}
-              >
+              <Link to="/jobseeker/register" style={{ color: "var(--primary)" }}>
                 Register here
               </Link>
             </p>
           </form>
-
-          <div style={{ marginTop: "20px" }}>
-            <button onClick={() => navigate("/employer")}>
-              Enter as Employer
-            </button>
-
-            <button onClick={() => navigate("/jobseeker")}>
-              Enter as Jobseeker
-            </button>
-          </div>
         </div>
       </div>
 
@@ -150,23 +148,17 @@ export default function JobseekerLogin() {
         <div className="card-body">
           <ul className="list-unstyled">
             <li className="py-3 divider-b flex-center-gap">
-              <span style={{ color: "var(--primary)", fontWeight: "bold" }}>
-                1
-              </span>
+              <span style={{ color: "var(--primary)", fontWeight: "bold" }}>1</span>
               Create your professional profile
             </li>
 
             <li className="py-3 divider-b flex-center-gap">
-              <span style={{ color: "var(--primary)", fontWeight: "bold" }}>
-                2
-              </span>
+              <span style={{ color: "var(--primary)", fontWeight: "bold" }}>2</span>
               Upload your CV
             </li>
 
             <li className="py-3 flex-center-gap">
-              <span style={{ color: "var(--primary)", fontWeight: "bold" }}>
-                3
-              </span>
+              <span style={{ color: "var(--primary)", fontWeight: "bold" }}>3</span>
               Apply to jobs and get hired
             </li>
           </ul>
