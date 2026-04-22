@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getProfile, updateProfile, uploadFile } from "../../services/api"; 
+import { getProfile, updateProfile, uploadFile } from "../../services/api";
+
 export default function JobseekerProfileView() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,21 +24,17 @@ export default function JobseekerProfileView() {
     const loadProfile = async () => {
       try {
         setLoading(true);
-        setError("");
-
         const data = await getProfile();
-        const safe = data || {};
 
-        setProfile(safe);
+        setProfile(data || {});
 
         setFormData({
-          username: safe.username || "",
-          email: safe.email || "",
-          phone: safe.phone || "",
-          location: safe.location || "",
+          username: data?.username || "",
+          email: data?.email || "",
+          phone: data?.phone || "",
+          location: data?.location || "",
         });
       } catch (err) {
-        console.error("PROFILE LOAD ERROR:", err);
         setError(err?.message || "Failed to load profile");
       } finally {
         setLoading(false);
@@ -47,19 +44,10 @@ export default function JobseekerProfileView() {
     loadProfile();
   }, []);
 
-  // =========================
-  // INPUT HANDLER
-  // =========================
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // =========================
-  // FILE PREVIEW
-  // =========================
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
@@ -72,7 +60,7 @@ export default function JobseekerProfileView() {
   };
 
   // =========================
-  // ✅ FIXED SAVE PROFILE
+  // FIXED SUBMIT (REAL BACKEND SAFE)
   // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,94 +70,44 @@ export default function JobseekerProfileView() {
     try {
       let avatarUrl = profile?.avatar || "";
 
-      // upload image first if selected
       if (file) {
-        const uploadRes = await uploadFile(file, "profile");
-        avatarUrl = uploadRes?.url || avatarUrl;
+        const uploaded = await uploadFile(file, "profile");
+        avatarUrl = uploaded?.url || avatarUrl;
       }
 
       const payload = {
-        username: formData.username.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone.trim(),
-        location: formData.location.trim(),
+        ...formData,
         avatar: avatarUrl,
       };
 
-      console.log("🚀 SENDING PROFILE UPDATE:", payload);
-
       const updated = await updateProfile(payload);
 
-      console.log("✅ PROFILE UPDATED:", updated);
-
-      const finalData = updated || payload;
-
-      setProfile(finalData);
-
-      // sync UI immediately
-      setFormData({
-        username: finalData.username || "",
-        email: finalData.email || "",
-        phone: finalData.phone || "",
-        location: finalData.location || "",
-      });
-
-      alert("Profile updated successfully ✅");
+      setProfile(updated);
+      alert("Profile updated successfully");
     } catch (err) {
-      console.error("❌ UPDATE ERROR:", err);
-
-      setError(
-        err?.message ||
-        err?.error ||
-        "Failed to update profile"
-      );
+      console.error(err);
+      setError(err?.message || "Failed to update profile");
     } finally {
       setSaving(false);
     }
   };
 
-  // =========================
-  // LOADING STATE
-  // =========================
-  if (loading) {
-    return (
-      <div className="card">
-        <p>Loading profile...</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="card">Loading profile...</div>;
 
   return (
     <div className="card">
       <h2>My Profile</h2>
 
-      {error && (
-        <div style={{ color: "red", marginBottom: 10 }}>
-          {error}
-        </div>
-      )}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {/* AVATAR */}
-      <div style={{ marginBottom: 20 }}>
-        <img
-          src={
-            preview ||
-            profile?.avatar ||
-            "https://via.placeholder.com/100"
-          }
-          alt="avatar"
-          style={{
-            width: 100,
-            height: 100,
-            borderRadius: "50%",
-            objectFit: "cover",
-          }}
-        />
-      </div>
+      <img
+        src={preview || profile?.avatar || "https://via.placeholder.com/100"}
+        alt="avatar"
+        style={{ width: 100, height: 100, borderRadius: "50%" }}
+      />
 
-      <input type="file" accept="image/*" onChange={handleFileChange} />
+      <input type="file" onChange={handleFileChange} />
 
-      {/* FORM */}
       <form onSubmit={handleSubmit}>
         <input
           name="username"
@@ -200,9 +138,9 @@ export default function JobseekerProfileView() {
         />
 
         <button type="submit" disabled={saving}>
-          {saving ? "Saving..." : "Update Profile"}
+          {saving ? "Saving..." : "Save Changes"}
         </button>
       </form>
     </div>
   );
-} 
+}  

@@ -1,13 +1,14 @@
 import axios from "axios";
 
-// ===============================
 // 🌐 BASE URL
+<<<<<<< HEAD
 // ===============================
 export const BASE_URL = "http://localhost:5001";
+=======
+export const BASE_URL = "https://kazilive-backend.onrender.com";
+>>>>>>> 8dc70652 (Fix API exports, profile update, and dashboard functionality)
 
-// ===============================
-// ⚙️ AXIOS INSTANCE
-// ===============================
+// ⚙️ Axios instance
 const API = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -19,34 +20,23 @@ const API = axios.create({
 // 🔐 AUTH
 // ===============================
 
-// REGISTER (FIXED + SAFE)
 export const register = async (userData) => {
   try {
     const res = await API.post("/api/auth/register", userData);
     return res.data;
   } catch (error) {
-    console.error("REGISTER ERROR:", error?.response?.data || error.message);
-    throw error?.response?.data || { message: "Registration failed" };
+    console.error("REGISTER ERROR:", error.response?.data || error.message);
+    throw error.response?.data || { message: "Registration failed" };
   }
 };
 
-// LOGIN (FIXED NORMALIZED PAYLOAD)
 export const login = async (credentials) => {
   try {
-    const payload = {
-      identifier:
-        credentials.identifier ||
-        credentials.email ||
-        credentials.username ||
-        credentials.phone,
-      password: credentials.password,
-    };
-
-    const res = await API.post("/api/auth/login", payload);
+    const res = await API.post("/api/auth/login", credentials);
     return res.data;
   } catch (error) {
-    console.error("LOGIN ERROR:", error?.response?.data || error.message);
-    throw error?.response?.data || { message: "Login failed" };
+    console.error("LOGIN ERROR:", error.response?.data || error.message);
+    throw error.response?.data || { message: "Login failed" };
   }
 };
 
@@ -66,16 +56,10 @@ export const getProfile = async () => {
 
     return res.data;
   } catch (error) {
-    console.error("GET PROFILE ERROR:", error?.response?.data || error.message);
-    throw error?.response?.data || { message: "Failed to fetch profile" };
+    console.error("GET PROFILE ERROR:", error.response?.data || error.message);
+    throw error.response?.data || { message: "Failed to fetch profile" };
   }
 };
-
-export const fetchProfile = getProfile;
-
-// ===============================
-// ✏️ UPDATE PROFILE
-// ===============================
 
 export const updateProfile = async (data) => {
   try {
@@ -89,13 +73,13 @@ export const updateProfile = async (data) => {
 
     return res.data;
   } catch (error) {
-    console.error("UPDATE PROFILE ERROR:", error?.response?.data || error.message);
-    throw error?.response?.data || { message: "Profile update failed" };
+    console.error("UPDATE PROFILE ERROR:", error.response?.data || error.message);
+    throw error.response?.data || { message: "Failed to update profile" };
   }
 };
 
 // ===============================
-// 📤 FILE UPLOAD (GENERIC FIXED)
+// 📤 FILE UPLOAD
 // ===============================
 
 export const uploadFile = async (file, fileType = "general") => {
@@ -115,27 +99,21 @@ export const uploadFile = async (file, fileType = "general") => {
 
     return res.data;
   } catch (error) {
-    console.error("UPLOAD ERROR:", error?.response?.data || error.message);
-    throw error?.response?.data || { message: "Upload failed" };
+    console.error("UPLOAD ERROR:", error.response?.data || error.message);
+    throw error.response?.data || { message: "Upload failed" };
   }
 };
 
 // ===============================
-// 🏢 EMPLOYER LOGO UPLOAD (FIXED EXPORT)
+// 🏢 COMPANY LOGO UPLOAD (FIXED MISSING EXPORT)
 // ===============================
 
-export const uploadCompanyLogo = (file) => {
+export const uploadCompanyLogo = async (file) => {
   return uploadFile(file, "company_logo");
 };
 
 // ===============================
-// 🔁 BACKWARD COMPATIBILITY HELPERS
+// EXPORT AXIOS INSTANCE
 // ===============================
 
-// some components still use this name
-export const loginUser = login;
-
-// ===============================
-// DEFAULT EXPORT
-// ===============================
 export default API; 

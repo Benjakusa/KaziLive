@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
-import DataTable from "../../components/shared/DataTable";
 import { BASE_URL } from "../../services/api";
 
 import {
@@ -22,55 +21,81 @@ import JobseekerSettingsView from "../../components/dashboard/JobseekerSettingsV
 const JobseekerDashboard = () => {
   const [activeTab, setActiveTab] = useState("Overview");
 
-  // ✅ OFFERS STATE
-  const [offers, setOffers] = useState([
-    {
-      id: 1,
-      company: "Tech Corp",
-      position: "Frontend Developer",
-      salary: "KSh 120,000",
-      date: "2024-04-10",
-    },
-    {
-      id: 2,
-      company: "Innovate Solutions",
-      position: "React Specialist",
-      salary: "KSh 150,000",
-      date: "2024-04-12",
-    },
-  ]);
+  // ===============================
+  // OFFERS (NOW BACKEND POWERED)
+  // ===============================
+  const [offers, setOffers] = useState([]);
+  const [loadingOffers, setLoadingOffers] = useState(true);
 
-  // ✅ REAL ACCEPT / DECLINE HANDLER
+  useEffect(() => {
+    const fetchOffers = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(`${BASE_URL}/jobseeker/offers`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+
+        setOffers(Array.isArray(data) ? data : data?.results || []);
+      } catch (err) {
+        console.error("OFFERS LOAD ERROR:", err);
+      } finally {
+        setLoadingOffers(false);
+      }
+    };
+
+    fetchOffers();
+  }, []);
+
+  // ===============================
+  // FIXED OFFER ACTION HANDLER
+  // ===============================
   const handleOfferAction = async (id, action) => {
     try {
       const token = localStorage.getItem("token");
 
-      await fetch(`${BASE_URL}/jobseeker/offers/${id}/${action}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `${BASE_URL}/jobseeker/offers/${id}/${action}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      // 🔥 remove instantly from UI
-      setOffers((prev) => prev.filter((offer) => offer.id !== id));
+      if (!res.ok) {
+        throw new Error("Failed to process offer");
+      }
 
+      // remove locally ONLY after backend success
+      setOffers((prev) => prev.filter((o) => o.id !== id));
     } catch (err) {
-      console.error("Offer action failed:", err);
-      alert("Failed to process offer");
+      console.error("OFFER ERROR:", err);
+      alert(err.message || "Offer action failed");
     }
   };
 
-  // ✅ LOGOUT
+  // ===============================
+  // LOGOUT
+  // ===============================
   const handleLogout = () => {
     localStorage.removeItem("token");
     window.location.href = "/jobseeker/login";
   };
 
-  // ✅ AVAILABILITY
+  // ===============================
+  // AVAILABILITY
+  // ===============================
   const [available, setAvailable] = useState(true);
 
-  // ✅ MENU
+  // ===============================
+  // MENU
+  // ===============================
   const menuItems = [
     { label: "Overview", icon: LayoutDashboard, id: "Overview", onClick: () => setActiveTab("Overview") },
     { label: "My Profile", icon: User, id: "Profile", onClick: () => setActiveTab("Profile") },
@@ -81,7 +106,9 @@ const JobseekerDashboard = () => {
     { label: "Logout", icon: LogOut, id: "Logout", onClick: handleLogout },
   ];
 
-  // ✅ TABLE
+  // ===============================
+  // OFFERS TABLE
+  // ===============================
   const offerColumns = [
     { header: "Company", accessor: "company" },
     { header: "Position", accessor: "position" },
@@ -93,14 +120,14 @@ const JobseekerDashboard = () => {
       render: (id) => (
         <div className="table-actions">
           <button
-            className="btn-table btn-accept"
+            className="btn-accept"
             onClick={() => handleOfferAction(id, "accept")}
           >
             Accept
           </button>
 
           <button
-            className="btn-table btn-decline"
+            className="btn-decline"
             onClick={() => handleOfferAction(id, "decline")}
           >
             Decline
@@ -110,7 +137,9 @@ const JobseekerDashboard = () => {
     },
   ];
 
-  // ✅ OVERVIEW
+  // ===============================
+  // OVERVIEW
+  // ===============================
   const renderOverview = () => (
     <div className="dashboard-grid">
 
@@ -126,7 +155,40 @@ const JobseekerDashboard = () => {
 
       <div className="card mt-6">
         <h3>Job Offers</h3>
-        <DataTable columns={offerColumns} data={offers} />
+
+        {loadingOffers ? (
+          <p>Loading offers...</p>
+        ) : (
+          <table className="table">
+            <thead>
+              <tr>
+                {offerColumns.map((col) => (
+                  <th key={col.header}>{col.header}</th>
+                ))}
+              </tr>
+            </thead>
+
+            <tbody>
+              {offers.map((offer) => (
+                <tr key={offer.id}>
+                  <td>{offer.company}</td>
+                  <td>{offer.position}</td>
+                  <td>{offer.salary}</td>
+                  <td>{offer.date}</td>
+                  <td>
+                    <button onClick={() => handleOfferAction(offer.id, "accept")}>
+                      Accept
+                    </button>
+
+                    <button onClick={() => handleOfferAction(offer.id, "decline")}>
+                      Decline
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <div className="card mt-6">
