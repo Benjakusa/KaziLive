@@ -35,67 +35,86 @@ function AdminLogin() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-off-white p-6 animate-in fade-in duration-700">
-      <div className="glass-card max-w-md w-full p-10">
-        <div className="text-center mb-10">
-          <div className="w-20 h-20 bg-maroon/5 text-maroon rounded-[32px] flex items-center justify-center mx-auto mb-6 shadow-xl shadow-maroon/5 border border-maroon/10">
-            <Shield size={40} />
-          </div>
-          <h2 className="text-2xl font-black text-gray-900 tracking-tight uppercase">Admin Console</h2>
-          <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mt-1">Authorized Personnel Only</p>
+    <div className="grid-2">
+      <div className="card">
+        <div className="card-header">
+          <Shield size={24} />
+          <h2>Admin Console</h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="p-4 bg-danger/5 text-danger rounded-2xl border border-danger/10 flex items-center gap-3 text-sm font-medium animate-in slide-in-from-top-2">
-              <AlertCircle size={18} />
-              {error}
+        <div className="card-body">
+          {error && <div className="alert alert-error mb-4">{error}</div>}
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">Admin Email or ID</label>
+              <div className="input-icon-wrapper">
+                <Mail size={18} />
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="admin@kazilive.com"
+                  value={formData.identifier}
+                  onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
+                  required
+                />
+              </div>
             </div>
-          )}
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Admin Email or ID</label>
-            <div className="relative group">
-              <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-maroon transition-colors" />
-              <input
-                type="text"
-                className="glass-input pl-12"
-                placeholder="admin@kazilive.com"
-                value={formData.identifier}
-                onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
-                required
-              />
+            <div className="form-group">
+              <label className="form-label">Secure Password</label>
+              <div className="input-icon-wrapper">
+                <Lock size={18} />
+                <input
+                  type="password"
+                  className="form-input"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Secure Password</label>
-            <div className="relative group">
-              <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-maroon transition-colors" />
-              <input
-                type="password"
-                className="glass-input pl-12"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-              />
-            </div>
-          </div>
+            <button
+              type="submit"
+              className="btn btn-primary btn-block"
+              disabled={loading}
+            >
+              {loading ? "Establishing Session..." : "Sign In to Console"}
+            </button>
 
-          <button
-            type="submit"
-            className="glass-button w-full h-14 mt-4"
-            disabled={loading}
-          >
-            {loading ? <Loader className="animate-spin mx-auto" size={20} /> : 'Establish Secure Session'}
-          </button>
-        </form>
+            <p className="text-center mt-4 text-muted">
+              <Link to="/" style={{ color: "var(--primary)" }}>
+                &larr; Exit to Public Site
+              </Link>
+            </p>
+          </form>
+        </div>
+      </div>
 
-        <div className="text-center mt-10">
-          <Link to="/" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-maroon transition-colors">
-            &larr; Exit to Public Site
-          </Link>
+      <div className="card">
+        <div className="card-header">
+          <h3>Secure Access</h3>
+        </div>
+
+        <div className="card-body">
+          <ul className="list-unstyled">
+            <li className="py-3 divider-b flex-center-gap">
+              <span style={{ color: "var(--primary)", fontWeight: "bold" }}>1</span>
+              Authorized Personnel Only
+            </li>
+
+            <li className="py-3 divider-b flex-center-gap">
+              <span style={{ color: "var(--primary)", fontWeight: "bold" }}>2</span>
+              All sessions are logged and monitored
+            </li>
+
+            <li className="py-3 flex-center-gap">
+              <span style={{ color: "var(--primary)", fontWeight: "bold" }}>3</span>
+              Please sign out when finished
+            </li>
+          </ul>
         </div>
       </div>
     </div>
