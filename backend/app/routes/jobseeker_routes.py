@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from .. import db
-from ..models.user import Jobseeker, Employer
+from ..models.user import User, Jobseeker, Employer
 from ..models.document import Document
 from ..models.contact import Contact
 from ..services.cloudinary_service import upload_image, upload_document
@@ -12,7 +12,7 @@ bp = Blueprint('jobseeker', __name__, url_prefix='/api/jobseeker')
 @jwt_required()
 def upload_file():
     """Upload a file (CV, certificate, profile image)"""
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
@@ -102,7 +102,7 @@ def upload_public_file():
 @jwt_required()
 def update_profile():
     """Update jobseeker profile with availability, category, salary"""
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     try:
         data = request.get_json()
         if not data:
@@ -115,13 +115,13 @@ def update_profile():
         # Update user-level fields (email, phone)
         if 'email' in data:
             existing = User.query.filter_by(email=data['email']).first()
-            if existing and existing.id != user_id:
+            if existing and existing.id != int(user_id):
                 return jsonify({'error': 'Email already taken'}), 400
             jobseeker.email = data['email']
             
         if 'phone' in data:
             existing = User.query.filter_by(phone=data['phone']).first()
-            if existing and existing.id != user_id:
+            if existing and existing.id != int(user_id):
                 return jsonify({'error': 'Phone number already taken'}), 400
             jobseeker.phone = data['phone']
 
@@ -134,11 +134,18 @@ def update_profile():
             jobseeker.job_category = data['job_category']
         if 'expected_salary' in data:
             try:
-                jobseeker.expected_salary = int(data.get('expected_salary') or 0)
+                # Handle string with commas or KSh
+                salary_val = str(data.get('expected_salary') or '0')
+                salary_val = salary_val.replace(',', '').replace('KSh', '').strip()
+                jobseeker.expected_salary = int(float(salary_val))
             except (ValueError, TypeError):
                 jobseeker.expected_salary = 0
         if 'skills' in data:
-            jobseeker.skills = data['skills']
+            # Handle both list and comma-separated string
+            if isinstance(data['skills'], str):
+                jobseeker.skills = [s.strip() for s in data['skills'].split(',') if s.strip()]
+            else:
+                jobseeker.skills = data['skills']
         if 'location' in data:
             jobseeker.location = data['location']
         if 'bio' in data:
@@ -148,17 +155,26 @@ def update_profile():
                 jobseeker.years_of_experience = int(data.get('years_of_experience') or 0)
             except (ValueError, TypeError):
                 jobseeker.years_of_experience = 0
+        if data.get('profile_picture'):
+            jobseeker.profile_picture = data['profile_picture']
         
         db.session.commit()
         
         return jsonify({
             'message': 'Profile updated successfully',
             'profile': {
+                'id': jobseeker.id,
                 'full_name': jobseeker.full_name,
                 'email': jobseeker.email,
                 'phone': jobseeker.phone,
                 'job_category': jobseeker.job_category,
-                'skills': jobseeker.skills
+                'skills': jobseeker.skills,
+                'availability_status': jobseeker.availability_status,
+                'location': jobseeker.location,
+                'bio': jobseeker.bio,
+                'expected_salary': jobseeker.expected_salary,
+                'years_of_experience': jobseeker.years_of_experience,
+                'profile_picture': jobseeker.profile_picture
             }
         }), 200
 
@@ -173,7 +189,7 @@ def update_profile():
 @jwt_required()
 def get_profile():
     """Get jobseeker profile"""
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     
     jobseeker = Jobseeker.query.get(user_id)
     if not jobseeker:
@@ -181,6 +197,8 @@ def get_profile():
     
     return jsonify({
         'id': jobseeker.id,
+        'email': jobseeker.email,
+        'phone': jobseeker.phone,
         'full_name': jobseeker.full_name,
         'bio': jobseeker.bio,
         'location': jobseeker.location,
@@ -190,7 +208,8 @@ def get_profile():
         'years_of_experience': jobseeker.years_of_experience,
         'skills': jobseeker.skills or [],
         'profile_verified': jobseeker.profile_verified,
-        'profile_picture': jobseeker.profile_picture
+        'profile_picture': jobseeker.profile_picture,
+        'documents': [{'id': d.id, 'name': d.file_name, 'url': d.file_url, 'type': d.file_type, 'status': d.status} for d in Document.query.filter_by(user_id=user_id).all()]
     }), 200
 
 
@@ -244,6 +263,24 @@ def get_jobseeker_contacts():
         'status': c.status,
         'created_at': c.created_at.isoformat()
     } for c in contacts]), 200
+
+@bp.route('/contacts/<int:contact_id>/<string:action>', methods=['POST'])
+@jwt_required()
+def handle_contact_action(contact_id, action):
+    """Accept or decline an employer contact request"""
+    user_id = get_jwt_identity()
+    contact = Contact.query.filter_by(id=contact_id, jobseeker_id=user_id).first()
+    
+    if not contact:
+        return jsonify({'error': 'Instruction not found'}), 404
+    
+    if action not in ['accept', 'decline']:
+        return jsonify({'error': 'Invalid action'}), 400
+        
+    contact.status = 'accepted' if action == 'accept' else 'declined'
+    db.session.commit()
+    
+    return jsonify({'message': f'Request {action}ed successfully', 'status': contact.status}), 200
 
 @bp.route('/request-verification', methods=['POST'])
 @jwt_required()

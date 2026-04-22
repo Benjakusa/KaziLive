@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BASE_URL } from '../../services/api';
+import { adminListUsers, adminDeactivateUser, adminActivateUser, adminDeleteUser } from '../../services/api';
 import { Users, Search, Edit3, ShieldAlert, CheckCircle, Loader, Ban, Trash2 } from 'lucide-react';
 import Badge from '../shared/Badge';
 
@@ -10,26 +10,14 @@ const AdminUsersView = () => {
     const [search, setSearch] = useState('');
 
     const fetchUsers = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         setLoading(true);
+        setError('');
         try {
-            const response = await fetch(`${BASE_URL}/admin/users?_t=${Date.now()}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setUsers(data);
-            } else if (response.status === 401) {
-                setError('Session expired. Please login again.');
-                localStorage.clear();
-                window.location.href = '/admin/login';
-            } else {
-                setError(data.error || 'Failed to fetch users');
-            }
+            const data = await adminListUsers();
+            setUsers(data);
         } catch (err) {
-            setError('Failed to load user list.');
+            console.error("ADMIN FETCH USERS ERROR:", err);
+            setError(err.message || 'Failed to load user list.');
         } finally {
             setLoading(false);
         }
@@ -39,52 +27,45 @@ const AdminUsersView = () => {
         fetchUsers();
     }, []);
 
-    const handleAction = async (userId, action, method = 'PUT') => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
+    const handleAction = async (userId, action) => {
         const confirmMsg = action === 'delete' ? 'Are you sure you want to PERMANENTLY delete this user?' :
             `Are you sure you want to ${action} this user?`;
 
         if (!window.confirm(confirmMsg)) return;
 
         try {
-            const endpoint = action === 'delete' ? `${BASE_URL}/admin/users/${userId}` : `${BASE_URL}/admin/users/${userId}/${action}`;
-            const response = await fetch(endpoint, {
-                method: action === 'delete' ? 'DELETE' : 'PUT',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-
-            if (response.ok) {
-                if (action === 'delete') {
-                    setUsers(users.filter(u => u.id !== userId));
-                } else {
-                    setUsers(users.map(u =>
-                        u.id === userId ? { ...u, is_active: action === 'activate' } : u
-                    ));
-                }
-            } else {
-                const data = await response.json();
-                alert(`Action failed: ${data.error}`);
+            if (action === 'delete') {
+                await adminDeleteUser(userId);
+                setUsers(users.filter(u => u.id !== userId));
+            } else if (action === 'deactivate') {
+                await adminDeactivateUser(userId);
+                setUsers(users.map(u => u.id === userId ? { ...u, is_active: false } : u));
+            } else if (action === 'activate') {
+                await adminActivateUser(userId);
+                setUsers(users.map(u => u.id === userId ? { ...u, is_active: true } : u));
             }
         } catch (err) {
-            alert('Something went wrong. Please try again.');
+            alert(`Action failed: ${err.message}`);
         }
     };
 
     const filteredUsers = users.filter(u =>
-        u.username.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase())
+        (u.username || '').toLowerCase().includes(search.toLowerCase()) ||
+        (u.email || '').toLowerCase().includes(search.toLowerCase())
     );
 
     return (
-        <div className="dashboard-content-area">
+        <div className="dashboard-content-area animate-in fade-in duration-500">
             <div className="section-header-flex">
-                <h2>User Management</h2>
-                <div className="search-box-md">
+                <div>
+                    <h2 className="text-2xl font-bold">User Management</h2>
+                    <p className="text-gray-500 text-sm">Control platform access and manage user status</p>
+                </div>
+                <div className="relative min-w-[300px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input
                         type="text"
-                        className="form-input"
+                        className="glass-input pl-10 h-11"
                         placeholder="Search by name or email..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -92,60 +73,69 @@ const AdminUsersView = () => {
                 </div>
             </div>
 
-            {error && <div className="alert alert-error mt-4">{error}</div>}
+            {error && <div className="p-4 bg-red-50 text-red-600 rounded-xl mt-6 border border-red-100">{error}</div>}
 
-            <div className="card mt-6 p-0 overflow-hidden">
-                <table className="data-table">
-                    <thead>
+            <div className="glass-card mt-8 p-0 overflow-hidden border border-gray-100">
+                <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-50 border-b border-gray-100">
                         <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Joined Date</th>
-                            <th>Actions</th>
+                            <th className="p-4 text-xs font-black uppercase tracking-widest text-gray-400">Name</th>
+                            <th className="p-4 text-xs font-black uppercase tracking-widest text-gray-400">Email</th>
+                            <th className="p-4 text-xs font-black uppercase tracking-widest text-gray-400">Role</th>
+                            <th className="p-4 text-xs font-black uppercase tracking-widest text-gray-400">Status</th>
+                            <th className="p-4 text-xs font-black uppercase tracking-widest text-gray-400">Joined</th>
+                            <th className="p-4 text-xs font-black uppercase tracking-widest text-gray-400">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-gray-100 bg-white">
                         {loading ? (
-                            <tr><td colSpan="6" className="text-center py-12"><Loader className="animate-spin mx-auto" /></td></tr>
+                            <tr><td colSpan="6" className="text-center py-20"><Loader className="animate-spin mx-auto text-maroon" /></td></tr>
                         ) : filteredUsers.length === 0 ? (
-                            <tr><td colSpan="6" className="text-center py-12 text-muted">No users found.</td></tr>
+                            <tr><td colSpan="6" className="text-center py-20 text-gray-400 font-medium italic">No users found.</td></tr>
                         ) : (
                             filteredUsers.map(user => (
-                                <tr key={user.id}>
-                                    <td><strong>{user.username}</strong></td>
-                                    <td>{user.email}</td>
-                                    <td><Badge variant={user.user_type === 'employer' ? 'black' : 'maroon'}>{user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1)}</Badge></td>
-                                    <td>
-                                        <Badge variant={user.is_active ? 'success' : 'maroon'}>{user.is_active ? 'Active' : 'Deactivated'}</Badge>
+                                <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
+                                    <td className="p-4"><span className="font-bold text-gray-900">{user.username}</span></td>
+                                    <td className="p-4 text-gray-600 text-sm">{user.email}</td>
+                                    <td className="p-4">
+                                        <Badge variant={user.user_type === 'employer' ? 'black' : 'maroon'}>
+                                            {user.user_type.charAt(0).toUpperCase() + user.user_type.slice(1)}
+                                        </Badge>
                                     </td>
-                                    <td>{user.created_at}</td>
-                                    <td>
-                                        <div className="table-actions">
+                                    <td className="p-4">
+                                        <Badge variant={user.is_active ? 'success' : 'yellow'}>
+                                            <div className="flex items-center gap-1.5">
+                                                <div className={`w-1.5 h-1.5 rounded-full ${user.is_active ? 'bg-success' : 'bg-yellow-500'}`} />
+                                                {user.is_active ? 'Active' : 'Deactivated'}
+                                            </div>
+                                        </Badge>
+                                    </td>
+                                    <td className="p-4 text-sm text-gray-500 font-medium">{user.created_at}</td>
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-2">
                                             {user.is_active ? (
                                                 <button
-                                                    className="btn-table btn-decline"
+                                                    className="glass-button black p-2"
                                                     onClick={() => handleAction(user.id, 'deactivate')}
                                                     title="Deactivate"
                                                 >
-                                                    <Ban size={14} />
+                                                    <Ban size={18} />
                                                 </button>
                                             ) : (
                                                 <button
-                                                    className="btn-table btn-accept"
+                                                    className="glass-button p-2"
                                                     onClick={() => handleAction(user.id, 'activate')}
                                                     title="Activate"
                                                 >
-                                                    <CheckCircle size={14} />
+                                                    <CheckCircle size={18} />
                                                 </button>
                                             )}
                                             <button
-                                                className="btn-table btn-danger"
+                                                className="glass-button black p-2 hover:!bg-red-600"
                                                 onClick={() => handleAction(user.id, 'delete')}
                                                 title="Delete User"
                                             >
-                                                <Trash2 size={14} />
+                                                <Trash2 size={18} />
                                             </button>
                                         </div>
                                     </td>

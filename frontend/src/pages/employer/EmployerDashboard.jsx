@@ -98,69 +98,75 @@ const EmployerDashboard = () => {
         <StatCard title="Response Rate" value="94%" icon={TrendingUp} />
       </div>
 
-      <div className="dashboard-main-grid">
-        <div className="dashboard-left-col">
-          <div className="card talent-search-card">
-            <div className="card-header-flex">
-              <h3>Quick Talent Search</h3>
-              <Zap size={20} className="text-yellow" />
+      <div className="dashboard-main-grid flex-1">
+        <div className="dashboard-left-col space-y-8">
+          <div className="glass-card p-8">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                <Zap size={20} className="text-amber-500" /> Quick Talent Search
+              </h3>
+              <Badge variant="primary">AI Powered</Badge>
             </div>
-            <div className="search-box-large mt-4">
-              <Search size={24} className="search-icon-large" />
-              <input type="text" className="form-input" placeholder="Search by skills, title, or location..." />
-              <button className="btn-primary">Search</button>
+            <div className="relative group">
+              <Search size={22} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-maroon transition-colors" />
+              <input
+                type="text"
+                className="glass-input pl-14 h-14 text-base"
+                placeholder="Search by skills, title, or location..."
+              />
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 glass-button h-10 px-6">Search</button>
             </div>
-            <div className="tag-group mt-4">
-              <span className="search-tag">React.js</span>
-              <span className="search-tag">Python</span>
-              <span className="search-tag">Product Manager</span>
-              <span className="search-tag">Graphic Design</span>
+            <div className="flex flex-wrap gap-2 mt-6">
+              {['React.js', 'Python', 'Product Manager', 'Graphic Design'].map(tag => (
+                <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-500 text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-maroon/5 hover:text-maroon transition-colors cursor-pointer">{tag}</span>
+              ))}
             </div>
           </div>
 
-          <div className="card mt-6">
-            <div className="card-header-flex">
-              <h3>Profile View Analytics</h3>
+          <div className="glass-card p-8">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                <TrendingUp size={20} className="text-maroon" /> Profile View Analytics
+              </h3>
               <Badge variant="primary">This Week</Badge>
             </div>
-            <div className="mt-4">
+            <div className="h-[250px]">
               <Chart type="bar" data={chartData} xKey="name" yKey="views" />
             </div>
           </div>
 
-          <div className="card mt-6">
-            <div className="card-header">
-              <h3>Recommended Matches (AI)</h3>
+          <div className="glass-card overflow-hidden">
+            <div className="px-8 py-6 border-b border-gray-50 flex items-center justify-between">
+              <h3 className="font-bold text-gray-900">Recommended Matches</h3>
+              <button className="text-[10px] font-black uppercase tracking-widest text-maroon hover:underline">See All &rarr;</button>
             </div>
             <DataTable
               columns={talentColumns}
               data={talentData}
-              title="Talent matching your active jobs"
             />
           </div>
         </div>
 
-
-        <div className="dashboard-right-col">
-          <div className="card billing-card">
-            <h3>Recent Billing</h3>
-            <div className="billing-summary mt-4">
-              <div className="billing-item">
-                <span>Last Deposit (M-Pesa)</span>
-                <span className="font-bold">KSh 5,000</span>
+        <div className="dashboard-right-col space-y-8">
+          <div className="glass-card p-8 bg-gradient-to-br from-maroon/5 to-transparent border-l-4 border-maroon">
+            <h3 className="font-bold text-gray-900 mb-6">Billing Summary</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center pb-4 border-b border-gray-50">
+                <span className="text-xs font-medium text-gray-400">Last Deposit</span>
+                <span className="font-black text-gray-900">KSh 5,000</span>
               </div>
-              <div className="billing-item mt-2">
-                <span>Last View Deducted</span>
-                <span className="text-maroon font-bold">-10 Credits</span>
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-medium text-gray-400">Last View</span>
+                <span className="font-black text-maroon">-10 Credits</span>
               </div>
             </div>
-            <button className="btn-yellow-outline btn-block mt-6">Top Up Credits</button>
+            <button className="glass-button w-full h-12 mt-8">Top Up Credits</button>
           </div>
 
-          <div className="card mt-6 job-post-cta">
-            <h3>Need to post a job?</h3>
-            <p className="mt-2 small">Post a public job listing to reach more candidates.</p>
-            <button className="btn-white-maroon mt-4">Post Public Job</button>
+          <div className="glass-card p-8 border-l-4 border-indigo-500 bg-indigo-50/20">
+            <h3 className="font-bold text-indigo-600 text-sm uppercase tracking-tight mb-2">Recruitment Booster</h3>
+            <p className="text-xs font-medium text-indigo-800 leading-relaxed mb-6">Post a public job listing to reach thousands of candidates instantly.</p>
+            <button className="glass-button black w-full h-12">Post Public Job</button>
           </div>
         </div>
       </div>

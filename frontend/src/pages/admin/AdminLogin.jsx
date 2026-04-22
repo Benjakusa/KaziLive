@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Shield, Lock, Mail } from 'lucide-react';
+import { Shield, Lock, Mail, Loader, AlertCircle } from 'lucide-react';
 import { loginSuccess } from '../../features/auth/authSlice';
+import { login } from '../../services/api';
 
 function AdminLogin() {
   const navigate = useNavigate();
@@ -17,88 +18,84 @@ function AdminLogin() {
     setLoading(true);
 
     try {
-      const res = await fetch('https://kazilive-backend.onrender.com/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      let data;
-      try {
-        const text = await res.text();
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        data = {};
-      }
-
-      if (!res.ok) {
-        throw new Error(data.error || `Login failed (${res.status})`);
-      }
+      const data = await login(formData);
 
       if (data.user?.user_type !== 'admin') {
-        throw new Error('Access denied. Admin only.');
+        throw new Error('Access denied. This portal is restricted to system administrators.');
       }
 
       dispatch(loginSuccess({ user: data.user, token: data.access_token }));
       navigate('/admin/dashboard');
     } catch (err) {
-      setError(err.message);
+      console.error("ADMIN LOGIN ERROR:", err);
+      setError(err.message || "Authentication failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '40px auto' }}>
-      <div className="card">
-        <div className="card-header" style={{ flexDirection: 'column', textAlign: 'center' }}>
-          <Shield size={48} style={{ color: 'var(--primary)', marginBottom: '16px' }} />
-          <h2>Admin Portal</h2>
-          <p className="text-muted">Sign in to manage the platform</p>
+    <div className="flex items-center justify-center min-h-screen bg-off-white p-6 animate-in fade-in duration-700">
+      <div className="glass-card max-w-md w-full p-10">
+        <div className="text-center mb-10">
+          <div className="w-20 h-20 bg-maroon/5 text-maroon rounded-[32px] flex items-center justify-center mx-auto mb-6 shadow-xl shadow-maroon/5 border border-maroon/10">
+            <Shield size={40} />
+          </div>
+          <h2 className="text-2xl font-black text-gray-900 tracking-tight uppercase">Admin Console</h2>
+          <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest mt-1">Authorized Personnel Only</p>
         </div>
 
-        <div className="card-body">
-          <form onSubmit={handleSubmit}>
-            {error && <div className="error-message" style={{ color: 'var(--accent)', marginBottom: '16px', padding: '12px', background: 'rgba(128, 0, 0, 0.1)', borderRadius: '4px', fontSize: '0.9rem' }}>{error}</div>}
-
-            <div className="form-group">
-              <label className="form-label">Admin Identifier</label>
-              <div className="input-icon-wrapper">
-                <Mail size={18} />
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="Email, Username, or Phone"
-                  value={formData.identifier}
-                  onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
-                  required
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="p-4 bg-danger/5 text-danger rounded-2xl border border-danger/10 flex items-center gap-3 text-sm font-medium animate-in slide-in-from-top-2">
+              <AlertCircle size={18} />
+              {error}
             </div>
+          )}
 
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <div className="input-icon-wrapper">
-                <Lock size={18} />
-                <input
-                  type="password"
-                  className="form-input"
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                />
-              </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Admin Email or ID</label>
+            <div className="relative group">
+              <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-maroon transition-colors" />
+              <input
+                type="text"
+                className="glass-input pl-12"
+                placeholder="admin@kazilive.com"
+                value={formData.identifier}
+                onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
+                required
+              />
             </div>
-
-            <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
-
-          <div className="text-center mt-4">
-            <Link to="/" style={{ color: 'var(--primary)', textDecoration: 'none' }}>Back to Home</Link>
           </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Secure Password</label>
+            <div className="relative group">
+              <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-maroon transition-colors" />
+              <input
+                type="password"
+                className="glass-input pl-12"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="glass-button w-full h-14 mt-4"
+            disabled={loading}
+          >
+            {loading ? <Loader className="animate-spin mx-auto" size={20} /> : 'Establish Secure Session'}
+          </button>
+        </form>
+
+        <div className="text-center mt-10">
+          <Link to="/" className="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-maroon transition-colors">
+            &larr; Exit to Public Site
+          </Link>
         </div>
       </div>
     </div>

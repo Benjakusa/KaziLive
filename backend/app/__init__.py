@@ -17,8 +17,16 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    # Temporary permissive CORS for debugging
-    cors.init_app(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+    # Robust CORS for development and production
+    CORS(app, resources={r"/api/*": {
+        "origins": ["http://localhost:5173", "http://127.0.0.1:5173"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }, r"/*": {
+        "origins": ["http://localhost:5173", "http://127.0.0.1:5173"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }}, supports_credentials=True)
     
     # Initialize Cloudinary
     try:
@@ -67,6 +75,13 @@ def create_app(config_class=Config):
     try:
         from .routes.advert_routes import bp as advert_bp
         app.register_blueprint(advert_bp)
+    except ImportError:
+        pass
+    
+    # Register offer routes
+    try:
+        from .routes.offer_routes import bp as offer_bp
+        app.register_blueprint(offer_bp)
     except ImportError:
         pass
     

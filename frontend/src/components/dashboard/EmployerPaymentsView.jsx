@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { BASE_URL } from '../../services/api';
-import { CreditCard, ArrowUpRight, ArrowDownLeft, Clock, Plus, Smartphone, CheckCircle, Loader, CircleSlash } from 'lucide-react';
+import { getEmployerPayments, employerStkPush } from '../../services/api';
+import { CreditCard, ArrowUpRight, ArrowDownLeft, Clock, Plus, Smartphone, CheckCircle, Loader, CircleSlash, AlertCircle } from 'lucide-react';
 import Badge from '../shared/Badge';
-import { useSelector } from 'react-redux';
 
 const EmployerPaymentsView = () => {
-    const { token } = useSelector((state) => state.auth);
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(false);
     const [message, setMessage] = useState('');
@@ -13,27 +11,25 @@ const EmployerPaymentsView = () => {
     const [amount, setAmount] = useState('1000');
     const [showForm, setShowForm] = useState(false);
     const [transactions, setTransactions] = useState([]);
+    const [error, setError] = useState('');
 
     const fetchPayments = async () => {
         setFetching(true);
+        setError('');
         try {
-            const response = await fetch(`${BASE_URL}/employer/payments`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setTransactions(data);
-            }
+            const data = await getEmployerPayments();
+            setTransactions(data);
         } catch (err) {
-            console.error('Failed to load payments');
+            console.error('Failed to load payments:', err);
+            setError(err.message || 'Failed to load transaction history.');
         } finally {
             setFetching(false);
         }
     };
 
     useEffect(() => {
-        if (token) fetchPayments();
-    }, [token]);
+        fetchPayments();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -41,82 +37,83 @@ const EmployerPaymentsView = () => {
         setMessage('');
 
         try {
-            const response = await fetch(`${BASE_URL}/employer/stk-push`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    phone_number: phone,
-                    amount: amount
-                })
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                setMessage('Payment simulated successfully! Your account is now verified.');
-                setTimeout(() => {
-                    setShowForm(false);
-                    fetchPayments();
-                }, 2000);
-            } else {
-                setMessage(`Error: ${data.error}`);
-            }
+            await employerStkPush(phone, amount);
+            setMessage('✅ Payment processed successfully! Your business account is now verified.');
+            setPhone('');
+            setTimeout(() => {
+                setShowForm(false);
+                fetchPayments();
+            }, 2500);
         } catch (err) {
-            setMessage('Failed to initiate payment simulation');
+            setMessage(`❌ Error: ${err.message || 'Payment failed'}`);
         } finally {
             setLoading(false);
         }
     };
 
-    const totalSpent = transactions.reduce((sum, tx) => sum + tx.amount, 0);
+    const totalSpent = transactions.reduce((sum, tx) => sum + (tx.amount || 0), 0);
 
     return (
-        <div className="dashboard-content-area">
+        <div className="dashboard-content-area animate-in fade-in duration-500">
             <div className="section-header-flex">
-                <h2>Payments & Credits</h2>
-                <button className="btn-maroon" onClick={() => setShowForm(!showForm)}>
-                    <Plus size={18} />
-                    {showForm ? 'Cancel' : 'Top Up Balance'}
+                <div>
+                    <h2 className="text-2xl font-bold">Payments & Verification</h2>
+                    <p className="text-gray-500 text-sm">Manage your billing and professional subscription status</p>
+                </div>
+                <button
+                    className={`glass-button !h-12 !px-6 ${showForm ? 'black' : ''}`}
+                    onClick={() => setShowForm(!showForm)}
+                >
+                    {showForm ? <CircleSlash size={16} /> : <Plus size={16} />}
+                    {showForm ? 'Cancel Payment' : 'Verify Account'}
                 </button>
             </div>
 
             {showForm && (
-                <div className="card mt-6">
-                    <h3>Deposit via M-Pesa (Daraja Simulation)</h3>
-                    <p className="text-muted small">Enter your phone number to receive a simulated STK push.</p>
-                    <form onSubmit={handleSubmit} className="mt-4">
-                        <div className="form-group">
-                            <label className="form-label">M-Pesa Phone Number</label>
-                            <div className="input-icon-wrapper">
-                                <Smartphone size={18} />
-                                <input
-                                    type="tel"
-                                    className="form-input"
-                                    placeholder="2547XXXXXXXX"
-                                    value={phone}
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    required
-                                />
-                            </div>
+                <div className="glass-card mt-8 p-8 border-l-4 border-maroon">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-600">
+                            <Smartphone size={24} />
                         </div>
-                        <div className="form-group">
-                            <label className="form-label">Amount (KSh)</label>
+                        <div>
+                            <h3 className="text-lg font-bold">M-Pesa Verification</h3>
+                            <p className="text-gray-400 text-xs font-medium">Verify your company to unlock all jobseeker profiles</p>
+                        </div>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Phone Number (M-Pesa)</label>
+                            <input
+                                type="tel"
+                                className="glass-input"
+                                placeholder="2547XXXXXXXX"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Amount (KSh)</label>
                             <input
                                 type="number"
-                                className="form-input"
+                                className="glass-input"
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 required
                             />
                         </div>
-                        <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-                            {loading ? 'Processing STK Push...' : 'Initiate Secure Payment'}
-                        </button>
+                        <div className="col-span-full">
+                            <button
+                                type="submit"
+                                className="glass-button w-full h-16 text-lg"
+                                disabled={loading}
+                            >
+                                {loading ? <Loader className="animate-spin mx-auto" size={20} /> : 'Process Simulated Payment'}
+                            </button>
+                        </div>
                         {message && (
-                            <div className={`alert mt-4 ${message.includes('Error') ? 'alert-error' : 'alert-success'}`}>
-                                {message.includes('successfully') ? <CheckCircle size={16} className="mr-2" /> : null}
+                            <div className={`col-span-full p-4 rounded-2xl text-sm font-medium border ${message.includes('❌') ? 'bg-red-50 text-red-600 border-red-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
                                 {message}
                             </div>
                         )}
@@ -124,58 +121,72 @@ const EmployerPaymentsView = () => {
                 </div>
             )}
 
-            <div className="stats-row mt-6">
-                <div className="card stat-card-horizontal flex-1">
-                    <div className="stat-icon bg-success-light text-success"><CreditCard size={24} /></div>
-                    <div className="stat-info">
-                        <span className="text-muted">Current Status</span>
-                        <h3 className="m-0">{transactions.length > 0 ? 'Verified' : 'Pending'}</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
+                <div className="glass-card p-6 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center">
+                        <CheckCircle size={24} />
+                    </div>
+                    <div>
+                        <span className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Account Status</span>
+                        <h3 className="text-xl font-black text-gray-900">
+                            {transactions.some(tx => tx.status === 'completed') ? 'Verified' : 'Pending'}
+                        </h3>
                     </div>
                 </div>
-                <div className="card stat-card-horizontal flex-1">
-                    <div className="stat-icon bg-maroon-lightest text-maroon"><ArrowUpRight size={24} /></div>
-                    <div className="stat-info">
-                        <span className="text-muted">Total Spent</span>
-                        <h3 className="m-0">KSh {totalSpent.toLocaleString()}</h3>
+                <div className="glass-card p-6 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-maroon/5 text-maroon flex items-center justify-center">
+                        <ArrowUpRight size={24} />
+                    </div>
+                    <div>
+                        <span className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Total Billing</span>
+                        <h3 className="text-xl font-black text-gray-900">KSh {totalSpent.toLocaleString()}</h3>
                     </div>
                 </div>
             </div>
 
-            <div className="card mt-6 p-0">
-                <h4 className="p-4 m-0 border-b">Recent Transactions</h4>
-                <div className="table-responsive">
-                    <table className="data-table">
-                        <thead>
+            <div className="glass-card mt-8 p-0 overflow-hidden border border-gray-100">
+                <div className="p-6 border-b border-gray-50 flex items-center justify-between">
+                    <h3 className="font-bold text-gray-900">Transaction History</h3>
+                    <div className="p-2 rounded-lg bg-gray-50 text-gray-400">
+                        <Clock size={16} />
+                    </div>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-gray-50/50">
                             <tr>
-                                <th>Type</th>
-                                <th>Amount</th>
-                                <th>Date</th>
-                                <th>Ref No.</th>
-                                <th>Status</th>
+                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Type</th>
+                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Amount</th>
+                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Ref No.</th>
+                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Date</th>
+                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-gray-100 bg-white">
                             {fetching ? (
-                                <tr><td colSpan="5" className="text-center py-12"><Loader className="animate-spin mx-auto" /></td></tr>
+                                <tr><td colSpan="5" className="p-20 text-center"><Loader className="animate-spin mx-auto text-maroon" /></td></tr>
                             ) : transactions.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5" className="text-center py-12 text-muted">
-                                        <CircleSlash size={32} className="mx-auto opacity-20 mb-2" />
-                                        No transactions yet.
+                                    <td colSpan="5" className="p-20 text-center text-gray-400 italic">
+                                        No recent transactions found.
                                     </td>
                                 </tr>
                             ) : (
                                 transactions.map(tx => (
-                                    <tr key={tx.id}>
-                                        <td className="flex items-center gap-2">
-                                            <ArrowDownLeft size={14} className="text-success" />
-                                            Deposit
+                                    <tr key={tx.id} className="hover:bg-gray-50/50 transition-colors">
+                                        <td className="p-4">
+                                            <div className="flex items-center gap-2 font-bold text-gray-900">
+                                                <ArrowDownLeft size={14} className="text-emerald-500" />
+                                                Verification
+                                            </div>
                                         </td>
-                                        <td className="text-success font-bold">KSh {tx.amount.toLocaleString()}</td>
-                                        <td>{tx.created_at}</td>
-                                        <td className="text-mono small">{tx.transaction_id}</td>
-                                        <td>
-                                            <Badge variant="success">{tx.status}</Badge>
+                                        <td className="p-4"><span className="font-black text-emerald-600">KSh {(tx.amount || 0).toLocaleString()}</span></td>
+                                        <td className="p-4"><span className="text-xs font-mono text-gray-400">{tx.transaction_id}</span></td>
+                                        <td className="p-4 text-xs font-medium text-gray-500">{tx.created_at}</td>
+                                        <td className="p-4">
+                                            <Badge variant={tx.status === 'completed' ? 'success' : 'yellow'}>
+                                                <span className="uppercase font-black text-[10px] tracking-widest">{tx.status}</span>
+                                            </Badge>
                                         </td>
                                     </tr>
                                 ))
